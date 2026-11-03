@@ -2,7 +2,7 @@
 // الاستراتيجية: الشبكة أولاً (عشان الأقمشة والأسعار تضل محدّثة)، والكاش فقط إذا انقطع النت.
 // طلبات Supabase والمكتبات الخارجية بتمرّ مباشرة بدون كاش.
 const CACHE = "daniella-v1";
-const PRECACHE = ["offline.html", "icons/icon-192.png", "icons/icon-512.png"];
+const PRECACHE = ["offline.html", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
