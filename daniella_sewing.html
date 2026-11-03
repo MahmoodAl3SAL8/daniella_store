@@ -1373,6 +1373,18 @@ function logVisit(page) {
 // تشغيل الثيم فوراً
 initTheme();
   </script>
+  <!-- تطبيق ويب (PWA): الأيقونة والمانيفست وتسجيل الـ service worker -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="دانييلا">
+  <script>
+    if ("serviceWorker" in navigator && location.protocol === "https:")
+      window.addEventListener("load", function () { navigator.serviceWorker.register("daniella_sw.js").catch(function () {}); });
+  </script>
 </head>
 <body>
   <!-- الشريط العلوي -->
