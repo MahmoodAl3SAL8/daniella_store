@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://daniella-curtains.mahmoodalsalee.workers.dev/sitemap.xml
