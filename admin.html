@@ -1,0 +1,2396 @@
+<!doctype html>
+<!--
+  لوحة تحكم صاحب المحل
+  - تسجيل دخول عن طريق Supabase Auth، وبتتأكد إنو الحساب أدمن
+  - إدارة الأقمشة وطرق الخياطة والبطانة والطلبات وإعدادات المتجر وتخصيص الواجهة
+-->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة تحكم دانييلا</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+  /* ألوان لوحة التحكم */
+  :root {
+    --bg: #f4f6f7;
+    --card: #ffffff;
+    --ink-black: #15191d;
+    --slate: #526b83;
+    --line: #dce2e5;
+    --muted: #737e86;
+    --red: #a84f55;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: #202020;
+    font-family: Tahoma,Arial,sans-serif;
+    line-height: 1.7;
+  }
+
+  /* هيدر اللوحة */
+  header {
+    background: var(--ink-black);
+    color: #ffffff;
+    padding: 18px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  header b {
+    font: bold 25px Georgia,serif;
+    letter-spacing: 2px;
+  }
+
+  header small {
+    display: block;
+    font: 12px Tahoma;
+    color: #b8c4cc;
+    letter-spacing: 0;
+  }
+
+  main {
+    max-width: 1100px;
+    margin: 28px auto;
+    padding: 0 16px;
+  }
+
+  .intro {
+    margin-bottom: 22px;
+  }
+
+  .intro h1 {
+    margin: 0;
+    color: var(--ink-black);
+  }
+
+  .intro p {
+    margin: 4px 0;
+    color: var(--muted);
+  }
+
+  /* تبويبات اللوحة */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 18px 0;
+  }
+
+  .tabs button, .btn {
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 16px;
+    background: var(--slate);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .tabs button {
+    background: #e9eef0;
+    color: var(--ink-black);
+  }
+
+  .tabs button.active {
+    background: var(--ink-black);
+    color: #ffffff;
+  }
+
+  /* اللوحات: بتظهر وحدة بس كل مرة (الفعّالة) */
+  .panel {
+    display: none;
+  }
+
+  .panel.active {
+    display: block;
+  }
+
+  /* شريط تخصيص الواجهة والمعاينة */
+  .dz-bar {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+  }
+
+  .dz-state {
+    font-size: 13px;
+    color: var(--muted,#737e86);
+    margin-inline: 10px;
+  }
+
+  .dz-state.on {
+    color: #a84f55;
+    font-weight: bold;
+  }
+
+  .pv {
+    display: block;
+    max-width: 150px;
+    max-height: 110px;
+    margin-top: 6px;
+    border-radius: 8px;
+    border: 1px dashed #9aa5ad;
+  }
+
+  /* نافذة المعاينة */
+  .pvm {
+    position: fixed;
+    inset: 0;
+    background: #000b;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .pvm[hidden] {
+    display: none;
+  }
+
+  .pv-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    background: #fff;
+    padding: 8px 10px;
+    border-radius: 10px 10px 0 0;
+  }
+
+  .pvm iframe {
+    flex: 1;
+    border: 0;
+    background: #fff;
+    margin: 0 auto;
+    width: 100%;
+    border-radius: 0 0 10px 10px;
+  }
+
+  input[type=color] {
+    height: 46px;
+    padding: 4px;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .field input[type=checkbox], label.ro input[type=checkbox] {
+    width: auto;
+    padding: 0;
+    margin: 0;
+  }
+
+  label.ro {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-weight: normal;
+  }
+
+  /* البطاقات وحقول النماذج */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 5px 20px #15191d0a;
+  }
+
+  .card h2 {
+    margin: 0 0 14px;
+    color: var(--ink-black);
+    font-size: 21px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 13px;
+  }
+
+  .field label {
+    display: block;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  .field input, .field textarea, .field select {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: #ffffff;
+    color: #202020;
+    font: inherit;
+  }
+
+  .field textarea {
+    min-height: 80px;
+  }
+
+  .full {
+    grid-column: 1/-1;
+  }
+
+  .actions {
+    display: flex;
+    gap: 9px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+
+  .btn.secondary {
+    background: #e9eef0;
+    color: var(--ink-black);
+  }
+
+  .btn.danger {
+    background: var(--red);
+  }
+
+  .hint {
+    background: #eef3f1;
+    border: 1px solid #cfdcd8;
+    border-radius: 10px;
+    padding: 12px;
+    color: #333333;
+    font-size: 13px;
+    margin-top: 12px;
+  }
+
+  /* قوائم العناصر (أقمشة، معرض...) */
+  .list {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 14px;
+  }
+
+  .item {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+  }
+
+  .item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    background: #eee;
+  }
+
+  .item .body {
+    padding: 12px;
+  }
+
+  .item h3 {
+    margin: 0;
+    color: var(--ink-black);
+  }
+
+  .item p {
+    margin: 4px 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .item .price {
+    color: var(--slate);
+    font-weight: bold;
+  }
+
+  .item .actions {
+    margin-top: 8px;
+  }
+
+  .item button {
+    font-size: 12px;
+    padding: 7px 10px;
+  }
+
+  /* صفوف طرق الخياطة */
+  .method-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .method-row:last-child {
+    border: 0;
+  }
+
+  .preview {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .preview img {
+    width: 100px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+  }
+
+  .empty {
+    color: var(--muted);
+    text-align: center;
+    padding: 25px;
+  }
+
+  .status {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* التجاوب مع الشاشات الصغيرة */
+  @media(max-width:700px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .list {
+      grid-template-columns: repeat(2,1fr);
+    }
+    .method-row {
+      grid-template-columns: 1fr;
+    }
+    .card {
+      padding: 15px;
+    }
+  }
+
+  @media(max-width:420px) {
+    .list {
+      grid-template-columns: 1fr;
+    }
+    header b {
+      font-size: 21px;
+    }
+  }
+
+  /* شاشة تسجيل الدخول */
+  .login {
+    max-width: 420px;
+    margin: 60px auto;
+    padding: 0 16px;
+  }
+
+  .error {
+    color: var(--red);
+    font-size: 14px;
+    min-height: 22px;
+    margin-top: 8px;
+  }
+  .subtabs{display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap}
+.subtabs button{border:1px solid var(--line);background:transparent;color:inherit;padding:9px 16px;border-radius:999px;font:inherit;cursor:pointer}
+.subtabs button.active{background:var(--slate,#444);color:#fff;border-color:transparent}
+</style></head>
+<body>
+  <!-- هيدر اللوحة -->
+  <header>
+    <div><b>DANIELLA</b><small>لوحة إدارة متجر دانييلا للستائر والديكور</small></div>
+    <span>إدارة الأقمشة والخياطة والطلبات</span><button class="btn secondary" id="notifBtn" hidden onclick="enableNotif()">🔔 تفعيل الإشعارات</button><button class="btn secondary" id="logoutBtn" hidden onclick="logout()">تسجيل خروج</button>
+  </header>
+  <!-- شاشة تسجيل دخول صاحب المحل -->
+  <div class="login" id="loginBox">
+    <div class="card">
+      <h2>تسجيل دخول صاحب المحل</h2>
+      <form id="loginForm">
+        <div class="field"><label>الإيميل</label><input id="loginEmail" type="email" autocomplete="username" required></div>
+        <div class="field" style="margin-top:12px"><label>كلمة السر</label><input id="loginPass" type="password" autocomplete="current-password" required></div>
+        <div class="error" id="loginMsg"></div>
+        <div class="actions"><button class="btn" id="loginBtn" type="submit">دخول</button></div>
+      </form>
+    </div>
+  </div>
+  <!-- اللوحة نفسها: بتظهر بعد التحقق من الدخول، كل تبويب هو <section class="panel"> -->
+  <main id="appMain" hidden>
+    <div class="hint" id="newOrderBar" hidden></div>
+    <div class="intro">
+      <h1>لوحة تحكم صاحب المحل</h1>
+      <p>أضف الأقمشة والأسعار والصور، وأدرج طرق الخياطة وصور تنفيذات المحل.</p>
+    </div>
+    <div class="tabs"><button class="active" onclick="tab('fabrics',this)">الأقمشة</button> <button onclick="tab('methods',this)">طرق الخياطة</button> <button onclick="tab('lists',this)">القوائم</button> <button onclick="tab('gallery',this)">صور أعمال المحل</button> <button onclick="tab('orders',this)">الطلبات</button> <button onclick="tab('settings',this)">الإعدادات</button> <button onclick="tab('design',this)">تخصيص واجهة المتجر</button> <button onclick="tab('visits',this)">الزوار</button> </div>
+    <!-- تبويب القوائم -->
+    <section id="lists" class="panel">
+      <div class="card">
+        <h2>إدارة القوائم</h2>
+        <p class="status">أنشئ أي قائمة (أنواع الأقمشة، أنواع البطانة...) وأضف عناصرها وعدّلها وأخفِها ورتّبها. قائمة «أنواع الأقمشة» تتحكم بأقسام الأقمشة في المتجر مباشرة. طرق الخياطة وألوان الحلق والبطانة لها تبويباتها الخاصة وتعمل كما هي.</p>
+        <form id="listForm" class="actions" style="align-items:end">
+          <div class="field" style="flex:1;min-width:200px;margin:0"><label>اسم قائمة جديدة</label><input id="listName" maxlength="80" required placeholder="مثلاً: أنواع الخياطة"></div>
+          <button class="btn" type="submit">+ إنشاء القائمة</button>
+        </form>
+      </div>
+      <div id="listsBox"></div>
+    </section>
+    <!-- تبويب الطلبات -->
+    <section id="orders" class="panel">
+      <div class="card">
+        <h2>الطلبات</h2>
+        <div class="actions"><button class="btn secondary" onclick="loadOrders()">تحديث القائمة</button></div>
+        <div id="orderList"></div>
+      </div>
+    </section>
+    <!-- تبويب إعدادات المتجر -->
+    <section id="settings" class="panel">
+      <div class="card">
+        <h2>إعدادات المتجر</h2>
+        <p class="status">هذه المعلومات تظهر للزبائن.</p>
+        <form id="settingsForm">
+          <div class="grid">
+            <div class="field"><label>سعر الدولار (كم ليرة سورية = 1 دولار)</label><input id="setRate" type="number" min="1" step="any" placeholder="اتركه فارغاً لإيقاف الدفع بالدولار"></div>
+            <div class="field"><label>رقم هاتف / واتساب المحل</label><input id="setPhone" maxlength="30"></div>
+            <div class="field"><label>رقم واتساب (مع رمز الدولة، أرقام فقط، مثال 963912345678)</label><input id="setWa" maxlength="20" inputmode="numeric"></div>
+            <div class="field"><label>رسالة واتساب الجاهزة</label><input id="setWaMsg" maxlength="200" placeholder="مرحباً، أريد الاستفسار عن ستائر دانييلا"></div>
+            <div class="field full"><label>بيانات حساب شام كاش (تظهر للزبون عند اختيار شام كاش)</label><textarea id="setSham" rows="3" maxlength="300"></textarea></div>
+          </div>
+          <div class="actions"><button class="btn" type="submit">حفظ الإعدادات</button></div>
+        </form>
+      </div>
+    </section>
+    <!-- تبويب الزوار -->
+    <section id="visits" class="panel">
+      <div class="card">
+        <h2>زوار المتجر</h2>
+        <p class="status">عدد الزيارات والزوار المختلفين. لا نخزّن أي بيانات شخصية.</p>
+        <div id="visitStats" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px"></div>
+        <div class="actions"><button class="btn secondary" onclick="loadVisits()">تحديث</button></div>
+      </div>
+    </section>
+    <!-- تبويب تخصيص واجهة المتجر -->
+    <section id="design" class="panel">
+      <div class="card dz-bar"><b>تخصيص واجهة المتجر</b> <span id="dzState" class="dz-state">لا توجد تعديلات غير محفوظة</span>
+        <div class="actions"><button class="btn secondary" onclick="openPreview()">👁 معاينة التغييرات</button><button class="btn" onclick="publishDesign()">💾 حفظ ونشر التغييرات</button><button class="btn danger" onclick="discardDesign()">↩ إلغاء التعديلات غير المحفوظة</button></div>
+      </div>
+      <div class="card">
+        <h2>الألوان</h2>
+        <p class="status">غيّر ألوان كل وضع، ثم عاين، ثم احفظ وانشر. الزبون يبدّل بين الوضعين بالزر الذي بجانب السلة.</p>
+        <div class="field"><label>الوضع الافتراضي للزبائن</label><select id="themeDefSel"><option value="dark">داكن (الألوان الحالية)</option><option value="light">فاتح (ذهبي وبيج وعاجي)</option></select></div>
+        <h3>الوضع الداكن (الألوان الحالية)</h3>
+        <div class="grid" id="theme_dark"></div>
+        <h3>الوضع الفاتح (ذهبي وبيج وعاجي وبني فاتح)</h3>
+        <div class="grid" id="theme_light"></div>
+        <div class="actions"><button class="btn danger" onclick="resetTheme()">استرجاع الألوان الافتراضية</button></div>
+      </div>
+      <div class="card">
+        <h2>القوائم</h2>
+        <p class="status">أضف قوائم أو احذفها، غيّر أسماءها وروابطها وترتيبها، وأخفِ أو أظهر أي قائمة.</p>
+        <div id="navList"></div>
+        <div class="actions"><button class="btn secondary" onclick="navAdd()">+ إضافة قائمة</button><button class="btn danger" onclick="resetNav()">استرجاع الافتراضية</button></div>
+      </div>
+      <div class="card">
+        <h2>الصور</h2>
+        <p class="status">صورة الغلاف والشعار تُعتمد مع «حفظ ونشر». أما صور الأقسام والأقمشة وطرق الخياطة والمعرض فتُحفظ فور رفعها من أزرارها.</p>
+        <div class="grid">
+          <div class="field"><label>صورة الغلاف الكبيرة (البانر)</label>
+            <div id="heroPrev"></div>
+            <input id="heroImgFile" type="file" accept="image/*">
+            <div class="actions"><button class="btn danger" onclick="removeSiteImage('hero_image')">إزالة الصورة</button></div>
+          </div>
+          <div class="field"><label>شعار المتجر (يحل محل الاسم)</label>
+            <div id="logoPrev"></div>
+            <input id="logoFile" type="file" accept="image/png,image/jpeg,image/webp">
+            <div class="actions"><button class="btn danger" onclick="removeSiteImage('logo')">إزالة الشعار</button></div>
+          </div>
+        </div>
+        <div class="actions"><button class="btn secondary" onclick="goTab('fabrics')">صور الأقمشة وألوانها</button><button class="btn secondary" onclick="goTab('methods')">صور طرق الخياطة</button><button class="btn secondary" onclick="goTab('gallery')">صور الأعمال والمعرض</button></div>
+      </div>
+      <div class="card" id="catImgCard">
+        <h2>صور أقسام الأقمشة</h2>
+        <p class="status">الصورة اللي ترفعها لكل قسم هي اللي تظهر بالبطاقة بالصفحة الرئيسية. ارفع صورة قماش من نفس النوع.</p>
+        <div id="catImgList"></div>
+      </div>
+      <div class="card">
+        <h2>محتوى الصفحة والأقسام</h2>
+        <p class="status">اترك أي خانة فارغة لتبقى صيغتها الافتراضية.</p>
+        <div id="contentFields"></div>
+        <h3>ترتيب الأقسام وإظهارها</h3>
+        <div id="secList"></div>
+        <div class="actions"><button class="btn danger" onclick="resetContent()">استرجاع الافتراضي</button></div>
+      </div>
+      <div class="card">
+        <h2>أزرار التواصل والدعم</h2>
+        <p class="status">رقم واتساب والرسالة الافتراضية ورقم الهاتف تُكتب من تبويب «الإعدادات». لا تظهر الأزرار إلا بعد كتابة رقم حقيقي.</p>
+        <label class="ro"><input type="checkbox" id="cfgWaFloat" checked> إظهار زر واتساب العائم في كل الصفحات</label> <label class="ro"><input type="checkbox" id="cfgSupport" checked> إظهار قسم التواصل مع فريق الدعم</label> <label class="ro"><input type="checkbox" id="cfgCall" checked> إظهار زر الاتصال المباشر داخل القسم</label>
+        <div class="actions"><button class="btn secondary" onclick="goTab('settings')">فتح الإعدادات</button></div>
+      </div>
+    </section>
+    <!-- نافذة المعاينة -->
+    <div class="pvm" id="pvModal" hidden>
+      <div class="pv-bar"><b>معاينة (لم تُنشر بعد)</b><button class="btn secondary" onclick="setPvMode('dark')">الوضع الداكن</button><button class="btn secondary" onclick="setPvMode('light')">الوضع الفاتح</button><button class="btn secondary" onclick="setPvDev('m')">📱 هاتف</button><button class="btn secondary" onclick="setPvDev('d')">💻 كمبيوتر</button><button class="btn danger" onclick="closePreview()">إغلاق</button></div>
+      <iframe id="pvFrame" title="معاينة المتجر"></iframe>
+    </div>
+    <!-- تبويب الأقمشة -->
+    <section id="fabrics" class="panel active">
+      <div class="subtabs">
+        <button class="active" id="fabSubBtnMain" onclick="fabSub('main')">الأقمشة</button>
+        <button id="fabSubBtnComp" onclick="fabSub('comp')">البرداية المركّبة</button>
+      </div>
+      <div id="fabSubMain">
+      <div class="card">
+        <h2 id="fabricFormTitle">إضافة نوع قماش جديد</h2>
+        <form id="fabricForm"><input type="hidden" id="fabricId">
+          <div class="grid">
+            <div class="field"><label>اسم القماش *</label><input id="fabricName" required placeholder="مثلاً: شيفون مطرز"></div>
+            <div class="field"><label>تصنيف القماش *</label><select id="fabricCategory" required></select></div>
+            <div class="field"><label>السعر بالليرة السورية *</label><input id="fabricPrice" type="number" min="0" step="1" required placeholder="السعر للمتر"></div>
+            <div class="field"><label>صورة القماش (JPG أو PNG)</label><input id="fabricImage" type="file" accept="image/*"></div>
+            <div class="field full"><label>مكانه بالبرداية المركّبة (اختياري، والقماش بيضل ينباع لحاله)</label><div class="actions" style="margin:0"><label class="ro"><input type="checkbox" id="fabricMiddle"> يظهر بالنص (شيفون)</label><label class="ro"><input type="checkbox" id="fabricSides"> يظهر كجوانب</label></div></div>
+            <div class="field full"><label>وصف القماش والألوان المتوفرة</label><textarea id="fabricDesc" placeholder="اكتب تفاصيل القماش والألوان والملاحظات..."></textarea></div>
+          </div>
+          <div class="preview" id="fabricPreview"></div>
+          <div class="actions"><button class="btn" type="submit">حفظ القماش</button><button class="btn secondary" type="button" onclick="resetFabric()">إلغاء التعديل</button></div>
+        </form>
+      </div>
+      <div class="card">
+        <h2>الأقمشة المضافة</h2>
+        <div class="list" id="fabricList"></div>
+      </div>
+      <div class="card" id="colorsCard" hidden>
+        <h2 id="colorsTitle">ألوان القماش</h2>
+        <p class="status">ارفع صورة لكل لون. هذه الصورة تظهر للزبون عند اختيار اللون.</p>
+        <div class="list" id="colorList"></div>
+        <form id="colorForm">
+          <div class="grid">
+            <div class="field"><label>اسم اللون *</label><input id="colorName" required maxlength="50" placeholder="مثلاً: رمادي فاتح"></div>
+            <div class="field"><label>صورة اللون *</label><input id="colorImage" type="file" accept="image/*" required></div>
+          </div>
+          <div class="actions"><button class="btn" id="colorBtn" type="submit">إضافة اللون</button><button class="btn secondary" type="button" onclick="closeColors()">إغلاق</button></div>
+        </form>
+      </div>
+      <!-- تبويب فرعي: البرداية المركّبة (شيفون بالنص + قماشة جوانب) -->
+      <div id="fabSubComp" hidden>
+        <div class="card">
+          <h2>البرداية المركّبة</h2>
+          <p>شيفون بالنص وقماشة تانية على الجوانب. الزبون بيختار الشيفون من الأقمشة المعلّمة «بالنص»، والجوانب من الأقمشة المعلّمة «جوانب»، والسعر من سعر كل قماش. الحساب: (أمتار الشيفون × (سعر الشيفون + سعر البطانة)) + (أمتار الجوانب × سعر قماشة الجوانب) + (سعر الخياطة × كل الأمتار). البطانة بتنحط على الشيفون فقط.</p>
+          <div class="grid">
+            <div class="field"><label>نسبة الشيفون بالنص % (من 45 إلى 60)</label><input id="compRatio" type="number" min="45" max="60" step="0.5" value="50"></div>
+            <div class="field"><label class="ro"><input type="checkbox" id="compEnabled"> مفعّلة للزبائن (ظاهرة بالمتجر)</label></div>
+          </div>
+          <div class="actions"><button class="btn" onclick="compSaveSet()">حفظ الإعدادات</button></div>
+          <div class="hint">الجوانب = 100% ناقص نسبة الشيفون. مثلاً شيفون 50% يعني جوانب 50%.</div>
+        </div>
+        <div class="card">
+          <h2>تحديد القسم كاملاً</h2>
+          <p>علّمي كل أقمشة قسم (قائمة) دفعة وحدة: بالنص أو جوانب أو الاتنين. القماش بيضل ينباع لحاله بالمتجر بكل الحالات.</p>
+          <div id="compCatList"></div>
+        </div>
+        <div class="card">
+          <h2>تحديد كل قماش لحاله</h2>
+          <p>القماش الجديد بتحددي مكانه كمان من نموذج إضافة القماش.</p>
+          <div id="compFabList"></div>
+        </div>
+      </div>
+    </section>
+    <!-- تبويب طرق الخياطة والبطانة والحلق -->
+    <section id="methods" class="panel">
+      <div class="card">
+        <h2>طرق الخياطة المعتمدة</h2>
+        <p>هذه الطرق مضافة كبداية، ويمكن لصاحب المحل تعديل الوصف والسعر الإضافي لكل طريقة.</p>
+        <div id="methodList"></div>
+        <div class="hint">الطرق الأساسية: خياطة حلق، خياطة زم، خياطة ويفي، خياطة تكسير.</div>
+      </div>
+      <div class="card">
+        <h2>إضافة طريقة خياطة أخرى</h2>
+        <form id="methodForm">
+          <div class="grid">
+            <div class="field"><label>اسم طريقة الخياطة</label><input id="methodName" required placeholder="اسم الطريقة"></div>
+            <div class="field"><label>سعر الخياطة لكل متر (ل.س)</label><input id="methodPrice" type="number" min="0" value="0"></div>
+            <div class="field"><label>الصورة التوضيحية</label><input id="methodImage" type="file" accept="image/*"></div>
+            <div class="field"><label>مضاعف القماش (× عرض الشباك)</label><input id="methodFactor" type="number" min="1" max="10" step="0.5" value="2"></div>
+            <div class="field"><label class="ro"><input type="checkbox" id="methodRing"> يحتاج لون حلق (للحلق فقط)</label></div>
+            <div class="field full"><label>شرح الطريقة</label><textarea id="methodDesc" placeholder="شرح مختصر للزبون"></textarea></div>
+          </div>
+          <div class="actions"><button class="btn" type="submit">إضافة طريقة</button></div>
+        </form>
+      </div>
+      <div class="card">
+        <h2>ألوان الحلق</h2>
+        <p>تظهر للزبون فقط عند اختيار طريقة تحتاج لون حلق (خياطة الحلق).</p>
+        <div id="ringList"></div>
+        <form id="ringForm">
+          <div class="grid">
+            <div class="field"><label>اسم اللون</label><input id="ringName" required maxlength="30"></div>
+            <div class="field"><label>لون العرض</label><input id="ringSwatch" type="color" value="#c9a14a"></div>
+          </div>
+          <div class="actions"><button class="btn" type="submit">إضافة لون حلق</button></div>
+        </form>
+      </div>
+      <div class="card">
+        <h2>أنواع البطانة</h2>
+        <p>سعر البطانة لكل متر قماش. إذا اختار الزبون "بدون بطانة" لا يُضاف أي سعر.</p>
+        <div id="liningList"></div>
+        <form id="liningForm">
+          <div class="grid">
+            <div class="field"><label>نوع البطانة</label><input id="liningName" required maxlength="50" placeholder="مثلاً: ساتان"></div>
+            <div class="field"><label>السعر لكل متر (ل.س)</label><input id="liningPrice" type="number" min="0" value="0"></div>
+          </div>
+          <div class="actions"><button class="btn" type="submit">إضافة نوع بطانة</button></div>
+        </form>
+      </div>
+      <div class="card" id="lcCard" hidden>
+        <h2 id="lcTitle">ألوان البطانة</h2>
+        <p class="status">أضف ألوان هذا النوع من البطانة. الصورة اختيارية.</p>
+        <div class="list" id="lcList"></div>
+        <form id="lcForm">
+          <div class="grid">
+            <div class="field"><label>اسم اللون *</label><input id="lcName" required maxlength="50" placeholder="مثلاً: أبيض"></div>
+            <div class="field"><label>صورة اللون (اختياري)</label><input id="lcImage" type="file" accept="image/*"></div>
+          </div>
+          <div class="actions"><button class="btn" id="lcBtn" type="submit">إضافة اللون</button><button class="btn secondary" type="button" onclick="closeLiningColors()">إغلاق</button></div>
+        </form>
+      </div>
+    </section>
+    <!-- تبويب صور أعمال المحل -->
+    <section id="gallery" class="panel">
+      <div class="card">
+        <h2>إضافة صور من شغل المحل</h2>
+        <form id="galleryForm">
+          <div class="grid">
+            <div class="field"><label>عنوان الصورة أو العمل *</label><input id="galleryTitle" required placeholder="مثلاً: ستارة ويفي لغرفة جلوس"></div>
+            <div class="field"><label>صورة من أعمال المحل *</label><input id="galleryImage" type="file" accept="image/*" required></div>
+            <div class="field full"><label>وصف العمل</label><textarea id="galleryDesc" placeholder="نوع القماش، طريقة الخياطة، ومعلومات إضافية"></textarea></div>
+          </div>
+          <div class="preview" id="galleryPreview"></div>
+          <div class="actions"><button class="btn" type="submit">حفظ صورة العمل</button></div>
+        </form>
+      </div>
+      <div class="card">
+        <h2>معرض أعمال دانييلا</h2>
+        <div class="list" id="galleryList"></div>
+      </div>
+    </section>
+    <div class="hint"><b>تنبيه:</b> كل ما تضيفه هنا محفوظ في قاعدة البيانات ويظهر للزبائن.</div>
+    <p class="status">نصيحة: استخدم صوراً مضغوطة بحجم مناسب. لا ترفع صور زبائن أو عناوينهم دون موافقتهم.</p>
+  </main>
+
+<script>
+// ===== سكربت لوحة التحكم =====
+// قراءة آمنة من localStorage مع قيمة افتراضية
+const read = (k, d) => {
+    try {
+        return JSON.parse(localStorage.getItem(k)) ?? d;
+    }
+    catch {
+        return d;
+    }
+};
+// البيانات المحمّلة بالذاكرة: الأقمشة وطرق الخياطة وصور المعرض
+let fabrics = [], methods = [], gallery = [];
+// بيانات الصور المؤقتة لمعاينتها قبل الرفع
+let fabricImageData = "", galleryImageData = "";
+
+// التبديل بين تبويبات اللوحة
+function tab(id, btn) {
+    document.querySelectorAll(".panel").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(".tabs button").forEach(x => x.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    btn.classList.add("active");
+}
+
+// قراءة ملف الصورة كـ base64 لعرض معاينة
+function imageData(file, cb) {
+    if (!file)
+        return;
+    let r = new FileReader();
+    r.onload = () => cb(r.result);
+    r.readAsDataURL(file);
+}
+document.getElementById("fabricImage").addEventListener("change", e => imageData(e.target.files[0], d => {
+    fabricImageData = d;
+    document.getElementById("fabricPreview").innerHTML = `<img src="${d}">`;
+}));
+document.getElementById("galleryImage").addEventListener("change", e => imageData(e.target.files[0], d => {
+    galleryImageData = d;
+    document.getElementById("galleryPreview").innerHTML = `<img src="${d}">`;
+}));
+
+function resetFabric() {
+    fabricFile = null;
+    document.getElementById("fabricForm").reset();
+    document.getElementById("fabricId").value = "";
+    fabricImageData = "";
+    document.getElementById("fabricPreview").innerHTML = "";
+    document.getElementById("fabricFormTitle").textContent = "إضافة نوع قماش جديد";
+}
+
+// تحميل الأقمشة من جدول products
+async function loadFabrics() {
+    const { data, error } = await sb.from("products").select("*").order("created_at", { ascending: false });
+    if (error) {
+        alert("تعذّر تحميل الأقمشة: " + error.message);
+        return;
+    }
+    fabrics = data.map(r => ({
+        id: r.id, name: r.name, category: r.category, price: Number(r.price_syp), desc: r.description, image: r.image_url, mid: !!r.use_middle, sides: !!r.use_sides
+    }));
+    fillFabricCat();
+    renderFabrics();
+    if (typeof compRender === "function")
+        compRender();
+    if (typeof renderCatImages === "function")
+        renderCatImages();
+}
+document.getElementById("fabricForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = document.getElementById("fabricId").value;
+    const row = {
+        name: fabricName.value.trim(), category: fabricCategory.value.trim(), price_syp: Math.round(Number(fabricPrice.value)), description: fabricDesc.value.trim(), use_middle: fabricMiddle.checked, use_sides: fabricSides.checked
+    };
+    if (!row.name || !row.category || !(row.price_syp >= 0)) {
+        alert("تأكد من الاسم والتصنيف والسعر");
+        return;
+    }
+    const btn = e.submitter;
+    if (btn)
+        btn.disabled = true;
+    const old = id ? fabrics.find(x => x.id === id) : null;
+    let uploaded = "";
+    try {
+        if (fabricFile) {
+            uploaded = await uploadImage(fabricFile, "fabrics");
+            row.image_url = uploaded;
+        }
+        const { error } = await (id ? sb.from("products").update(row).eq("id", id) : sb.from("products").insert(row));
+        if (error)
+            throw error;
+        if (uploaded && old?.image)
+            await removeImage(old.image);
+        resetFabric();
+        await loadFabrics();
+        alert("تم حفظ القماش.");
+    }
+    catch (err) {
+        if (uploaded)
+            await removeImage(uploaded);
+        alert("لم يتم الحفظ: " + (err.message || err));
+    }
+    finally {
+        if (btn)
+            btn.disabled = false;
+    }
+});
+
+// تعبئة النموذج ببيانات قماش للتعديل
+function editFabric(id) {
+    let f = fabrics.find(x => x.id === id);
+    fabricId.value = f.id;
+    fabricName.value = f.name;
+    fillFabricCat(f.category);
+    fabricCategory.value = f.category;
+    fabricPrice.value = f.price;
+    fabricDesc.value = f.desc || "";
+    fabricMiddle.checked = !!f.mid;
+    fabricSides.checked = !!f.sides;
+    fabricFile = null;
+    fabricPreview.innerHTML = /^https:\/\//.test(f.image || "") ? `<img src="${esc(f.image)}">` : "";
+    fabricFormTitle.textContent = "تعديل بيانات القماش";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// حذف قماش (بعد تأكيد)
+async function deleteFabric(id) {
+    if (!confirm("هل تريد حذف هذا القماش؟"))
+        return;
+    const f = fabrics.find(x => x.id === id);
+    const { data: cs } = await sb.from("product_colors").select("image_url").eq("product_id", id);
+    const { error } = await sb.from("products").delete().eq("id", id);
+    if (error) {
+        alert("لم يتم الحذف: " + error.message);
+        return;
+    }
+    if (f?.image)
+        await removeImage(f.image);
+    for (const c of cs || [])
+        await removeImage(c.image_url);
+    await loadFabrics();
+}
+
+// رسم قائمة الأقمشة
+function renderFabrics() {
+    fabricList.innerHTML = fabrics.length ? fabrics.map(f => `<article class="item">${/^https:\/\//.test(f.image || "") ? `<img src="${esc(f.image)}">` : ""}<div class="body"><h3>${esc(f.name)}</h3><p>${esc(f.category)} — ${esc(f.desc || "")}</p>${f.mid || f.sides ? `<p><small>برداية مركّبة: ${[f.mid ? "بالنص" : "", f.sides ? "جوانب" : ""].filter(Boolean).join(" + ")}</small></p>` : ""}<div class="price">${f.price.toLocaleString("ar-SY")} ل.س / متر</div><div class="actions"><button class="btn" onclick="openColors('${f.id}')">الألوان</button><button class="btn secondary" onclick="editFabric('${f.id}')">تعديل</button><button class="btn danger" onclick="deleteFabric('${f.id}')">حذف</button></div></div></article>`).join("") : '<div class="empty">لم تتم إضافة أقمشة بعد.</div>';
+}
+
+// تنظيف النص من رموز HTML
+function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+}
+
+// إعادة رسم الأقمشة وطرق الخياطة والمعرض
+function render() {
+    renderFabrics();
+    renderMethods();
+    renderGallery();
+}
+// إعدادات الاتصال بـ Supabase (المفتاح publishable، الحماية من سياسات RLS)
+const SUPABASE_URL = "https://xlegdzwjmwmayzksmbns.supabase.co";
+const SUPABASE_KEY = "sb_publishable_807CdfSocWri1gU6bh2T-Q_VUG5hBwU";
+const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+// رسالة بشاشة تسجيل الدخول
+function loginMsg(t) {
+    document.getElementById("loginMsg").textContent = t;
+}
+
+// إظهار اللوحة أو شاشة الدخول
+function showApp(on) {
+    document.getElementById("loginBox").hidden = on;
+    document.getElementById("appMain").hidden = !on;
+    document.getElementById("logoutBtn").hidden = !on;
+    document.getElementById("notifBtn").hidden = !on;
+}
+
+// بيتأكد إنو في جلسة دخول وإنو الحساب أدمن (profiles.is_admin) وبعدين بيحمّل كل البيانات
+async function verifyAdmin() {
+    if (!sb) {
+        showApp(false);
+        loginMsg("تعذّر تحميل مكتبة Supabase. تأكد من الإنترنت.");
+        return false;
+    }
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+        showApp(false);
+        return false;
+    }
+    const { data, error } = await sb.from("profiles").select("is_admin").eq("user_id", session.user.id).maybeSingle();
+    if (error || !data || data.is_admin !== true) {
+        await sb.auth.signOut();
+        showApp(false);
+        loginMsg("هذا الحساب ليس له صلاحية الإدارة.");
+        return false;
+    }
+    showApp(true);
+    loadFabrics();
+    loadGallery();
+    loadMethods();
+    loadLining();
+    loadOrders();
+    loadSettings();
+    loadLists();
+    loadCatImages();
+    loadRings();
+    compLoad();
+    loadVisits();
+    paintNotif();
+    regSW();
+    startOrderWatch();
+    return true;
+}
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    loginMsg("");
+    if (!sb) {
+        loginMsg("تعذّر تحميل مكتبة Supabase. تأكد من الإنترنت.");
+        return;
+    }
+    const btn = document.getElementById("loginBtn");
+    btn.disabled = true;
+    const { error } = await sb.auth.signInWithPassword({ email: loginEmail.value.trim(), password: loginPass.value });
+    btn.disabled = false;
+    if (error) {
+        loginMsg("الإيميل أو كلمة السر غير صحيحة.");
+        return;
+    }
+    loginPass.value = "";
+    await verifyAdmin();
+});
+
+// تسجيل الخروج
+async function logout() {
+    if (sb)
+        await sb.auth.signOut();
+    showApp(false);
+}
+// ملفات الصور المختارة للرفع
+let fabricFile = null, galleryFile = null;
+// اسم مخزن الصور بـ Supabase Storage
+const BUCKET = "daniella-images";
+document.getElementById("fabricImage").addEventListener("change", e => {
+    fabricFile = e.target.files[0] || null;
+});
+document.getElementById("galleryImage").addEventListener("change", e => {
+    galleryFile = e.target.files[0] || null;
+});
+
+// تصغير الصورة بالكانفس (أقصى 1600 بكسل) قبل الرفع لتوفير المساحة
+function compress(file, max = 1600, type = "image/jpeg") {
+    return new Promise((res, rej) => {
+        const img = new Image(), u = URL.createObjectURL(file);
+        img.onload = () => {
+            const r = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement("canvas");
+            c.width = Math.round(img.width * r);
+            c.height = Math.round(img.height * r);
+            c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+            URL.revokeObjectURL(u);
+            c.toBlob(b => b ? res(b) : rej(new Error("تعذّرت معالجة الصورة")), type, 0.85);
+        };
+        img.onerror = () => {
+            URL.revokeObjectURL(u);
+            rej(new Error("ملف الصورة غير صالح"));
+        };
+        img.src = u;
+    });
+}
+
+// رفع صورة للمخزن وإرجاع رابطها العام (بيقبل JPG أو PNG أو WEBP)
+async function uploadImage(file, folder, png = false) {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type))
+        throw new Error("الصيغ المسموحة: JPG أو PNG أو WEBP");
+    const blob = await compress(file, png ? 800 : 1600, png ? "image/png" : "image/jpeg"), path = folder + "/" + crypto.randomUUID() + (png ? ".png" : ".jpg");
+    const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: png ? "image/png" : "image/jpeg", cacheControl: "31536000" });
+    if (error)
+        throw error;
+    return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+// حذف صورة من المخزن عن طريق رابطها
+async function removeImage(url) {
+    const m = String(url || "").split("/" + BUCKET + "/")[1];
+    if (m)
+        await sb.storage.from(BUCKET).remove([decodeURIComponent(m)]);
+}
+
+// تحميل صور معرض الأعمال
+async function loadGallery() {
+    const { data, error } = await sb.from("work_gallery").select("*").order("created_at", { ascending: false });
+    if (error) {
+        alert("تعذّر تحميل المعرض: " + error.message);
+        return;
+    }
+    gallery = data.map(r => ({
+        id: r.id, title: r.title, desc: r.description, image: r.image_url
+    }));
+    renderGallery();
+}
+document.getElementById("galleryForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!galleryFile) {
+        alert("اختر صورة أولاً");
+        return;
+    }
+    const btn = e.submitter;
+    if (btn)
+        btn.disabled = true;
+    let url = "";
+    try {
+        url = await uploadImage(galleryFile, "gallery");
+        const { error } = await sb.from("work_gallery").insert({
+            title: galleryTitle.value.trim(), description: galleryDesc.value.trim(), image_url: url
+        });
+        if (error) {
+            await removeImage(url);
+            throw error;
+        }
+        e.target.reset();
+        galleryFile = null;
+        galleryPreview.innerHTML = "";
+        await loadGallery();
+        alert("تم حفظ صورة العمل.");
+    }
+    catch (err) {
+        alert("لم يتم الحفظ: " + (err.message || err));
+    }
+    finally {
+        if (btn)
+            btn.disabled = false;
+    }
+});
+
+// حذف صورة من المعرض
+async function deleteGallery(id) {
+    const g = gallery.find(x => x.id === id);
+    if (!g || !confirm("حذف صورة العمل؟"))
+        return;
+    const { error } = await sb.from("work_gallery").delete().eq("id", id);
+    if (error) {
+        alert("لم يتم الحذف: " + error.message);
+        return;
+    }
+    await removeImage(g.image);
+    await loadGallery();
+}
+
+// رسم صور المعرض
+function renderGallery() {
+    galleryList.innerHTML = gallery.length ? gallery.map(g => `<article class="item">${/^https:\/\//.test(g.image || "") ? `<img src="${esc(g.image)}">` : ""}<div class="body"><h3>${esc(g.title)}</h3><p>${esc(g.desc || "")}</p><button class="btn danger" onclick="deleteGallery('${g.id}')">حذف الصورة</button></div></article>`).join("") : '<div class="empty">لم تتم إضافة صور أعمال بعد.</div>';
+}
+// القماش المفتوح حالياً لإدارة ألوانه
+let curFabric = null, curColors = [];
+
+// فتح قسم ألوان قماش معين
+async function openColors(id) {
+    curFabric = fabrics.find(x => x.id === id);
+    if (!curFabric)
+        return;
+    colorsTitle.textContent = "ألوان: " + curFabric.name;
+    colorsCard.hidden = false;
+    await loadColors();
+    colorsCard.scrollIntoView({ behavior: "smooth" });
+}
+
+// إغلاق قسم الألوان
+function closeColors() {
+    colorsCard.hidden = true;
+    curFabric = null;
+    colorForm.reset();
+}
+
+// تحميل ألوان القماش المفتوح
+async function loadColors() {
+    const { data, error } = await sb.from("product_colors").select("*").eq("product_id", curFabric.id).order("sort_order").order("created_at");
+    if (error) {
+        alert("تعذّر تحميل الألوان: " + error.message);
+        return;
+    }
+    curColors = data;
+    colorList.innerHTML = data.length ? data.map(c => `<article class="item">${/^https:\/\//.test(c.image_url || "") ? `<img src="${esc(c.image_url)}">` : ""}<div class="body"><h3>${esc(c.color_name)}</h3><button class="btn danger" onclick="deleteColor('${c.id}')">حذف اللون</button></div></article>`).join("") : '<div class="empty">لم تتم إضافة ألوان بعد.</div>';
+}
+colorForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const file = colorImage.files[0];
+    if (!file || !curFabric)
+        return;
+    if (curColors.length >= 12) {
+        alert("الحد الأقصى 12 لوناً لكل قماش");
+        return;
+    }
+    colorBtn.disabled = true;
+    let url = "";
+    try {
+        url = await uploadImage(file, "colors");
+        const { error } = await sb.from("product_colors").insert({
+            product_id: curFabric.id, color_name: colorName.value.trim(), image_url: url, sort_order: curColors.length
+        });
+        if (error) {
+            await removeImage(url);
+            throw error;
+        }
+        colorForm.reset();
+        await loadColors();
+    }
+    catch (err) {
+        alert(err.code === "23505" ? "هذا اللون مضاف مسبقاً لهذا القماش" : "لم يتم الحفظ: " + (err.message || err));
+    }
+    finally {
+        colorBtn.disabled = false;
+    }
+});
+
+// حذف لون من ألوان القماش
+async function deleteColor(id) {
+    const c = curColors.find(x => x.id === id);
+    if (!c || !confirm("حذف هذا اللون؟"))
+        return;
+    const { error } = await sb.from("product_colors").delete().eq("id", id);
+    if (error) {
+        alert("لم يتم الحذف: " + error.message);
+        return;
+    }
+    await removeImage(c.image_url);
+    await loadColors();
+}
+// أنواع البطانة
+let liningOpts = [];
+// بيرسم وسم الصورة بس إذا الرابط https صحيح
+const imgTag = u => /^https:\/\//.test(u || "") ? `<img src="${esc(u)}" style="width:100px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--line)">` : "";
+
+// حذف طريقة خياطة
+async function deleteMethod(i) {
+    const m = methods[i];
+    if (!m || !confirm("حذف طريقة الخياطة؟"))
+        return;
+    const { error } = await sb.from("sewing_methods").delete().eq("id", m.id);
+    if (error) {
+        alert("لم يتم الحذف: " + error.message);
+        return;
+    }
+    if (m.image)
+        await removeImage(m.image);
+    await loadMethods();
+}
+
+// تحميل أنواع البطانة
+async function loadLining() {
+    const { data, error } = await sb.from("lining_options").select("*").order("created_at");
+    if (error) {
+        alert("تعذّر تحميل البطانة: " + error.message);
+        return;
+    }
+    liningOpts = data;
+    renderLining();
+}
+
+// رسم أنواع البطانة
+function renderLining() {
+    liningList.innerHTML = liningOpts.length ? liningOpts.map((l, i) => `<div class="method-row"><div class="field"><label>النوع</label><input id="ln${i}" value="${esc(l.name)}"></div><div class="field"><label>السعر لكل متر (ل.س)</label><input id="lp${i}" type="number" min="0" value="${Number(l.price_syp)}"></div><div class="actions"><button class="btn" onclick="openLiningColors(${i})">الألوان</button><button class="btn secondary" onclick="saveLining(${i})">حفظ</button><button class="btn danger" onclick="deleteLining(${i})">حذف</button></div></div>`).join("") : '<div class="empty">لا توجد أنواع بطانة.</div>';
+}
+
+// حفظ تعديلات نوع بطانة
+async function saveLining(i) {
+    const l = liningOpts[i], row = { name: document.getElementById("ln" + i).value.trim(), price_syp: Math.round(Number(document.getElementById("lp" + i).value || 0)) };
+    if (!row.name || !(row.price_syp >= 0)) {
+        alert("تأكد من الاسم والسعر");
+        return;
+    }
+    const { error } = await sb.from("lining_options").update(row).eq("id", l.id);
+    if (error) {
+        alert(error.code === "23505" ? "الاسم مكرر" : "لم يتم الحفظ: " + error.message);
+        return;
+    }
+    await loadLining();
+    alert("تم الحفظ.");
+}
+
+// حذف نوع بطانة
+async function deleteLining(i) {
+    const l = liningOpts[i];
+    if (!l || !confirm("حذف نوع البطانة؟"))
+        return;
+    const { data: cs } = await sb.from("lining_colors").select("image_url").eq("lining_id", l.id);
+    const { error } = await sb.from("lining_options").delete().eq("id", l.id);
+    if (error) {
+        alert("لم يتم الحذف: " + error.message);
+        return;
+    }
+    for (const c of cs || [])
+        if (c.image_url)
+            await removeImage(c.image_url);
+    if (curLining && curLining.id === l.id)
+        closeLiningColors();
+    await loadLining();
+}
+document.getElementById("liningForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const { error } = await sb.from("lining_options").insert({ name: liningName.value.trim(), price_syp: Math.round(Number(liningPrice.value || 0)) });
+    if (error) {
+        alert(error.code === "23505" ? "هذا النوع مضاف مسبقاً" : "لم يتم الحفظ: " + error.message);
+        return;
+    }
+    e.target.reset();
+    liningPrice.value = 0;
+    await loadLining();
+});
+// ألوان البطانة: النوع المفتوح وألوانه
+let curLining = null, curLC = [];
+
+// فتح ألوان نوع بطانة
+async function openLiningColors(i) {
+    curLining = liningOpts[i];
+    if (!curLining)
+        return;
+    lcTitle.textContent = "ألوان بطانة: " + curLining.name;
+    lcCard.hidden = false;
+    await loadLiningColors();
+    lcCard.scrollIntoView({ behavior: "smooth" });
+}
+
+// إغلاق ألوان البطانة
+function closeLiningColors() {
+    lcCard.hidden = true;
+    curLining = null;
+    lcForm.reset();
+}
+
+// تحميل ألوان البطانة
+async function loadLiningColors() {
+    const { data, error } = await sb.from("lining_colors").select("*").eq("lining_id", curLining.id).order("created_at");
+    if (error) {
+        alert("تعذّر تحميل الألوان: " + error.message);
+        return;
+    }
+    curLC = data;
+    lcList.innerHTML = data.length ? data.map(c => `<article class="item">${/^https:\/\//.test(c.image_url || "") ? `<img src="${esc(c.image_url)}">` : ""}<div class="body"><h3>${esc(c.color_name)}</h3><button class="btn danger" onclick="deleteLiningColor('${c.id}')">حذف اللون</button></div></article>`).join("") : '<div class="empty">لم تتم إضافة ألوان بعد.</div>';
+}
+lcForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!curLining)
+        return;
+    if (curLC.length >= 20) {
+        alert("الحد الأقصى 20 لوناً لكل نوع");
+        return;
+    }
+    const f = lcImage.files[0];
+    lcBtn.disabled = true;
+    let url = "";
+    try {
+        if (f)
+            url = await uploadImage(f, "lining");
+        const { error } = await sb.from("lining_colors").insert({
+            lining_id: curLining.id, color_name: lcName.value.trim(), image_url: url
+        });
+        if (error) {
+            if (url)
+                await removeImage(url);
+            throw error;
+        }
+        lcForm.reset();
+        await loadLiningColors();
+    }
+    catch (err) {
+        alert(err.code === "23505" ? "هذا اللون مضاف مسبقاً" : "لم يتم الحفظ: " + (err.message || err));
+    }
+    finally {
+        lcBtn.disabled = false;
+    }
+});
+
+// حذف لون بطانة
+async function deleteLiningColor(id) {
+    const c = curLC.find(x => x.id === id);
+    if (!c || !confirm("حذف هذا اللون؟"))
+        return;
+    const { error } = await sb.from("lining_colors").delete().eq("id", id);
+    if (error) {
+        alert("لم يتم الحذف: " + error.message);
+        return;
+    }
+    if (c.image_url)
+        await removeImage(c.image_url);
+    await loadLiningColors();
+}
+// حالات الطلب بالترتيب
+const STATUSES = ["جديد", "قيد المراجعة", "قيد التجهيز", "جاهز", "تم التوصيل", "ملغي"];
+// تنسيق المبلغ بالليرة السورية
+const fmtSyp = n => Number(n).toLocaleString("ar-SY") + " ل.س";
+
+// تحميل الطلبات
+async function loadOrders() {
+    const { data, error } = await sb.from("orders").select("*, order_items(*)").order("created_at", { ascending: false }).limit(100);
+    if (error) {
+        alert("تعذّر تحميل الطلبات: " + error.message);
+        return;
+    }
+    data.forEach(o => seenIds.add(o.id));
+    orderList.innerHTML = data.length ? data.map(o => {
+        const items = (o.order_items || []).map(i => `<li><b>${esc(i.product_name)}</b>${i.color_name ? " — " + esc(i.color_name) : ""} — ${Number(i.quantity)} م${i.is_composite ? `<br>برداية مركّبة: شيفون ${Number(i.middle_meters)} م + جوانب ${esc(i.side_fabric_name)} ${Number(i.side_meters)} م` : ""}${i.with_sewing ? `<br>خياطة: ${esc(i.sewing_method)}${i.ring_color ? " — لون الحلقات: " + esc(i.ring_color) : ""} (${Number(i.width_cm)}×${Number(i.height_cm)} سم)${i.lining_type ? `<br>بطانة: ${esc(i.lining_type)}${i.lining_color ? " — " + esc(i.lining_color) : ""}` : "<br>بدون بطانة"}` : "<br>قماش فقط بدون خياطة"}<br><small>${fmtSyp(i.line_total_syp)}</small></li>`).join("");
+        const total = o.currency === "USD" ? `$${Number(o.total_usd).toFixed(2)} (≈ ${fmtSyp(o.total_syp)})` : fmtSyp(o.total_syp);
+        return `<div class="card" style="margin-top:12px"><b>طلب #${esc(String(o.id).slice(0, 8))}</b> — ${esc(new Date(o.created_at).toLocaleString("ar-SY"))}<br>${esc(o.customer_name)} — <a href="tel:${esc(o.phone)}">${esc(o.phone)}</a><br>${esc(o.city)} — ${esc(o.address)}<br>الدفع: ${esc(o.payment_method)} — ${o.currency === "USD" ? "بالدولار" : "بالليرة السورية"}<br><b>الإجمالي: ${total}</b>${o.notes ? `<br>ملاحظات: ${esc(o.notes)}` : ""}<ul>${items}</ul><div class="field"><label>حالة الطلب</label><select onchange="updateStatus('${o.id}',this.value)">${STATUSES.map(s => `<option${s === o.status ? " selected" : ""}>${esc(s)}</option>`).join("")}</select></div></div>`;
+    }).join("") : '<div class="empty">لا توجد طلبات بعد.</div>';
+}
+
+// تغيير حالة طلب
+async function updateStatus(id, status) {
+    const { error } = await sb.from("orders").update({ status }).eq("id", id);
+    if (error) {
+        alert("لم يتم التحديث: " + error.message);
+        return;
+    }
+    alert("تم تحديث حالة الطلب.");
+}
+
+// قراءة إعدادات المتجر (سعر الدولار، الهاتف، واتساب، شام كاش) من store_settings
+async function loadSettings() {
+    const { data } = await sb.from("store_settings").select("*");
+    const m = {};
+    (data || []).forEach(r => m[r.key] = r.value);
+    setRate.value = m.usd_rate || "";
+    setPhone.value = m.store_phone || "";
+    setSham.value = m.shamcash_info || "";
+    setWa.value = m.whatsapp || "";
+    setWaMsg.value = m.wa_message || "";
+    loadDesign(m);
+}
+settingsForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const rate = setRate.value.trim(), wa = setWa.value.replace(/\D/g, "");
+    if (wa && (wa.length < 8 || wa.length > 15)) {
+        alert("رقم واتساب غير صحيح");
+        return;
+    }
+    if (rate && !/^\d+(\.\d+)?$/.test(rate)) {
+        alert("سعر الدولار غير صحيح. اكتب رقماً مثل 15000");
+        return;
+    }
+    const { error } = await sb.from("store_settings").upsert([
+        { key: "usd_rate", value: rate }, { key: "store_phone", value: setPhone.value.trim() }, { key: "shamcash_info", value: setSham.value.trim() }, { key: "whatsapp", value: wa }, { key: "wa_message", value: setWaMsg.value.trim() }
+    ]);
+    if (error) {
+        alert("لم يتم الحفظ: " + error.message);
+        return;
+    }
+    alert("تم حفظ الإعدادات.");
+});
+// التصنيفات الأساسية للأقمشة
+const BASE_CATS = ["الكل", "شيفون", "بلاك أوت", "مخمل", "كتان"];
+// صور أقسام الأقمشة
+let catImgs = {}, catKeys = [];
+// أسماء أنواع الأقمشة من قائمة fabric_types
+const fabTypeNames = () => {
+    const l = (typeof LISTS !== "undefined" && LISTS || []).find(x => x.list_key === "fabric_types");
+    return l ? l.items.map(i => i.name) : BASE_CATS.slice(1);
+};
+
+// تحميل صور الأقسام
+async function loadCatImages() {
+    const { data, error } = await sb.from("category_images").select("*");
+    if (error) {
+        alert("تعذّر تحميل صور الأقسام: " + error.message);
+        return;
+    }
+    catImgs = {};
+    data.forEach(r => catImgs[r.category] = r.image_url);
+    renderCatImages();
+}
+
+// رسم محرر صور الأقسام
+function renderCatImages() {
+    catKeys = ["الكل", ...fabTypeNames(), ...new Set(fabrics.map(f => f.category).filter(c => !fabTypeNames().includes(c)))];
+    catImgList.innerHTML = catKeys.map((c, i) => `<div class="method-row"><div class="field"><label>${esc(c === "الكل" ? "كل الأقمشة" : c)}</label>${imgTag(catImgs[c])}<input id="ci${i}" type="file" accept="image/*"></div><div class="actions"><button class="btn secondary" onclick="saveCatImage(${i})">حفظ الصورة</button>${catImgs[c] ? `<button class="btn danger" onclick="removeCatImage(${i})">إزالة</button>` : ""}</div></div>`).join("");
+}
+
+// رفع وحفظ صورة قسم
+async function saveCatImage(i) {
+    const c = catKeys[i], f = document.getElementById("ci" + i).files[0];
+    if (!f) {
+        alert("اختر صورة أولاً");
+        return;
+    }
+    let up = "";
+    try {
+        up = await uploadImage(f, "categories");
+        const { error } = await sb.from("category_images").upsert({
+            category: c, image_url: up, updated_at: new Date().toISOString()
+        });
+        if (error)
+            throw error;
+        if (catImgs[c])
+            await removeImage(catImgs[c]);
+        await loadCatImages();
+        alert("تم حفظ الصورة.");
+    }
+    catch (err) {
+        if (up)
+            await removeImage(up);
+        alert("لم يتم الحفظ: " + (err.message || err));
+    }
+}
+
+// إزالة صورة قسم
+async function removeCatImage(i) {
+    const c = catKeys[i];
+    if (!confirm("إزالة صورة هذا القسم؟"))
+        return;
+    const { error } = await sb.from("category_images").delete().eq("category", c);
+    if (error) {
+        alert("لم تتم الإزالة: " + error.message);
+        return;
+    }
+    if (catImgs[c])
+        await removeImage(catImgs[c]);
+    await loadCatImages();
+}
+// اسم صفحة المتجر (بتنفتح بالمعاينة)
+const STORE_FILE = "index.html";
+// JSON.parse بدون أخطاء
+const jparse = v => {
+    try {
+        return JSON.parse(v || "null");
+    }
+    catch (e) {
+        return null;
+    }
+};
+// ===== تخصيص واجهة المتجر =====
+// الألوان الافتراضية (نفس يلي بصفحة المتجر)
+const THEME_DEFAULT = { dark: {
+        bg: "#f4f6f7", text: "#252b30", heading: "#15191d", accent: "#526b83", accent2: "#78958e", menuBg: "#ffffff", menuText: "#15191d", surface: "#ffffff", line: "#dce2e5", mist: "#e9eef0", dark: "#15191d", muted: "#65707a"
+    }, light: {
+        bg: "#faf6ec", text: "#4a3b2a", heading: "#5b4630", accent: "#a8812e", accent2: "#d9bf86", menuBg: "#fffdf8", menuText: "#5b4630", surface: "#fffdf8", line: "#e7dcc3", mist: "#f3ead6", dark: "#6b5238", muted: "#7d6d56"
+    } };
+// أسماء حقول الألوان بالعربي
+const THEME_LABELS = {
+    bg: "لون خلفية الصفحة", text: "لون النصوص", heading: "لون العناوين", accent: "لون الأزرار والأسعار", accent2: "لون التمييز الثانوي", menuBg: "لون القوائم (الخلفية)", menuText: "لون نص القوائم", surface: "لون البطاقات", line: "لون الإطارات والتفاصيل", mist: "لون المساحات الفاتحة", dark: "لون الشريط العلوي والتواصل", muted: "لون النص الثانوي"
+};
+// القائمة الافتراضية
+const NAV_DEFAULT = [
+    { l: "الرئيسية", t: "s:home" }, { l: "الأقمشة", t: "s:fabrics" }, { l: "طرق الخياطة", t: "p:sewing" }, { l: "البرداية المركّبة", t: "p:composite" }, { l: "أعمالنا", t: "s:gallery" }, { l: "طريقة الطلب", t: "s:how" }, { l: "تواصل معنا", t: "s:contact" }
+];
+// الأهداف الممكنة لروابط القائمة
+const NAV_TARGETS = [
+    ["s:home", "الرئيسية (أعلى الصفحة)"], ["s:fabrics", "الأقمشة"], ["s:tailoring", "الخياطة والتفصيل (قسم)"], ["s:gallery", "أعمالنا"], ["s:how", "طريقة الطلب"], ["s:contact", "تواصل معنا"], ["p:sewing", "صفحة طرق الخياطة"], ["p:composite", "صفحة البرداية المركّبة"], ["u:", "رابط خارجي (https)"]
+];
+// النصوص القابلة للتعديل: [اسم المجموعة، [[المفتاح، الاسم، النص الافتراضي]]]
+const CONTENT_GROUPS = [
+    ["الشريط العلوي", [["top1", "الشريط العلوي (1)", "🚚 التوصيل حسب المنطقة"], ["top2", "الشريط العلوي (2)", "💳 شام كاش أو الدفع عند الاستلام"]]],
+    ["الهوية", [["brand", "اسم المتجر", "DANIELLA"], ["brandSub", "الوصف تحت الاسم", "دانييلا للستائر والديكور"]]],
+    ["غلاف الصفحة", [
+            ["heroEyebrow", "سطر صغير", "أناقة تليق بتفاصيل منزلك"], ["heroTitle", "العنوان", "دانييلا للستائر والديكور"], ["heroText", "النص", "اختاري القماش الذي تحبينه، حددي القياسات والتفصيل، واتركي الباقي علينا."], ["heroBtn", "نص الزر", "اكتشفي الأقمشة ←"]
+        ]],
+    ["شريط المميزات", [
+            ["b1", "ميزة 1: العنوان", "أقمشة متنوعة"], ["s1", "ميزة 1: النص", "خيارات وألوان متعددة"], ["b2", "ميزة 2: العنوان", "تفصيل حسب الطلب"], ["s2", "ميزة 2: النص", "قياسات تناسب منزلك"], ["b3", "ميزة 3: العنوان", "توصيل"], ["s3", "ميزة 3: النص", "بحسب مناطق التغطية"], ["b4", "ميزة 4: العنوان", "خدمة ومتابعة"], ["s4", "ميزة 4: النص", "نتابع طلبك خطوة بخطوة"]
+        ]],
+    ["عناوين الأقسام", [
+            ["fabTitle", "الأقمشة: العنوان", "تصفّحي أنواع الأقمشة"], ["fabSub", "الأقمشة: النص", "اختاري النوع المناسب لغرفتك وذوقك"], ["tailTitle", "الخياطة: العنوان", "طرق الخياطة لدينا"], ["tailSub", "الخياطة: النص", "اختاري الطريقة المناسبة عند طلب القماش. الأسعار لكل متر قماش."], ["galTitle", "الأعمال: العنوان", "أعمالنا"], ["galSub", "الأعمال: النص", "نماذج من أعمال محل دانييلا"], ["howTitle", "طريقة الطلب: العنوان", "طريقة الطلب سهلة وبسيطة"], ["howSub", "طريقة الطلب: النص", "من اختيار القماش حتى تأكيد الطلب"]
+        ]],
+    ["التواصل والتذييل", [
+            ["contactTitle", "التواصل: العنوان", "دانييلا… لمسة أناقة لكل نافذة"], ["contactText", "التواصل: النص", "للاستفسار عن الأقمشة والقياسات وطلبات التفصيل، تواصلي مع فريقنا."], ["footer", "التذييل", "DANIELLA — دانييلا للستائر والديكور. جميع الحقوق محفوظة."]
+        ]]
+];
+// أسماء أقسام الصفحة الرئيسية
+const SEC_LABELS = {
+    home: "الغلاف الرئيسي", benefits: "شريط المميزات", fabrics: "الأقمشة", tailoring: "طرق الخياطة", gallery: "أعمالنا", how: "طريقة الطلب", contact: "قسم التواصل مع الدعم"
+};
+// التحقق من صيغة اللون
+const HEXOK = v => /^#[0-9a-fA-F]{6}$/.test(v || "");
+// مسودة التخصيص قبل النشر (ألوان، قائمة، محتوى، ترتيب الأقسام)
+let lastSettings = {}, themeSaved = {}, navItems = [], contentDraft = {
+    texts: {}, hero_image: "", logo: ""
+}, secOrder = Object.keys(SEC_LABELS), secHidden = new Set(), dirty = false, pvMode = "dark";
+
+// بيبين إذا في تعديلات غير محفوظة
+function setDirty(v) {
+    dirty = v;
+    const e = document.getElementById("dzState");
+    if (e) {
+        e.textContent = v ? "● توجد تعديلات غير محفوظة" : "لا توجد تعديلات غير محفوظة";
+        e.classList.toggle("on", v);
+    }
+}
+
+// تعليم إنو صار في تعديل
+function markDirty() {
+    setDirty(true);
+}
+
+// تعبئة محرر التخصيص من الإعدادات المحفوظة
+function loadDesign(m) {
+    lastSettings = Object.assign({}, m);
+    themeSaved = jparse(m.theme_colors) || {};
+    themeDefSel.value = m.theme_default === "light" ? "light" : "dark";
+    renderThemeEditor();
+    const n = jparse(m.nav_menu);
+    navItems = Array.isArray(n) && n.length ? n.filter(x => x && typeof x.l === "string" && typeof x.t === "string").map(x => ({
+        l: x.l, t: x.t, h: !!x.h
+    })) : NAV_DEFAULT.map(x => ({ ...x }));
+    renderNavEditor();
+    const c = jparse(m.site_content) || {};
+    contentDraft = {
+        texts: c.texts || {}, hero_image: c.hero_image || "", logo: c.logo || ""
+    };
+    const so = c.sections || {};
+    secOrder = Array.isArray(so.order) ? so.order.filter(k => SEC_LABELS[k]) : [];
+    Object.keys(SEC_LABELS).forEach(k => {
+        if (!secOrder.includes(k))
+            secOrder.push(k);
+    });
+    secHidden = new Set(Array.isArray(so.hidden) ? so.hidden : []);
+    renderContentEditor();
+    const cfg = jparse(m.contact_cfg) || {};
+    cfgWaFloat.checked = cfg.waFloat !== false;
+    cfgSupport.checked = cfg.supportSection !== false;
+    cfgCall.checked = cfg.callBtn !== false;
+    setDirty(false);
+}
+
+// رسم حقول اختيار الألوان للوضعين
+function renderThemeEditor() {
+    ["dark", "light"].forEach(n => {
+        document.getElementById("theme_" + n).innerHTML = Object.keys(THEME_LABELS).map(k => {
+            const v = (themeSaved[n] || {})[k];
+            return `<div class="field"><label>${THEME_LABELS[k]}</label><input type="color" id="tc_${n}_${k}" value="${HEXOK(v) ? v : THEME_DEFAULT[n][k]}"></div>`;
+        }).join("");
+    });
+}
+
+// استرجاع الألوان الافتراضية (بدون حفظ)
+function resetTheme() {
+    if (!confirm("استرجاع الألوان الافتراضية للوضعين؟ (لن تُحفظ حتى تضغط حفظ ونشر)"))
+        return;
+    themeSaved = {};
+    renderThemeEditor();
+    markDirty();
+}
+// نوع هدف رابط القائمة
+const navKind = t => t.startsWith("u:") ? "u:" : t;
+
+// رسم محرر القائمة
+function renderNavEditor() {
+    navList.innerHTML = navItems.map((n, i) => `<div class="method-row"><div class="field"><label>الاسم</label><input value="${esc(n.l)}" maxlength="30" oninput="navItems[${i}].l=this.value"></div><div class="field"><label>الوجهة</label><select onchange="navTarget(${i},this.value)">${NAV_TARGETS.map(([v, l]) => `<option value="${v}"${navKind(n.t) === v ? " selected" : ""}>${l}</option>`).join("")}</select></div>${n.t.startsWith("u:") ? `<div class="field" style="grid-column:1/-1"><label>الرابط (https فقط)</label><input value="${esc(n.t.slice(2))}" placeholder="https://..." oninput="navItems[${i}].t='u:'+this.value"></div>` : ""}<div class="actions"><label class="ro"><input type="checkbox" ${n.h ? "" : "checked"} onchange="navItems[${i}].h=!this.checked"> ظاهر</label><button class="btn secondary" onclick="navMove(${i},-1)">▲</button><button class="btn secondary" onclick="navMove(${i},1)">▼</button><button class="btn danger" onclick="navDel(${i})">حذف</button></div></div>`).join("") || '<div class="empty">لا توجد عناصر. أضف عنصراً.</div>';
+}
+
+// تغيير هدف رابط
+function navTarget(i, v) {
+    navItems[i].t = v === "u:" ? "u:https://" : v;
+    renderNavEditor();
+    markDirty();
+}
+
+// تحريك رابط للأعلى أو للأسفل
+function navMove(i, d) {
+    const j = i + d;
+    if (j < 0 || j >= navItems.length)
+        return;
+    [navItems[i], navItems[j]] = [navItems[j], navItems[i]];
+    renderNavEditor();
+    markDirty();
+}
+
+// حذف رابط
+function navDel(i) {
+    navItems.splice(i, 1);
+    renderNavEditor();
+    markDirty();
+}
+
+// إضافة رابط (بحد أقصى 12)
+function navAdd() {
+    if (navItems.length >= 12) {
+        alert("الحد الأقصى 12 عنصراً");
+        return;
+    }
+    navItems.push({
+        l: "عنصر جديد", t: "s:home", h: false
+    });
+    renderNavEditor();
+    markDirty();
+}
+
+// استرجاع القائمة الافتراضية
+function resetNav() {
+    if (!confirm("استرجاع القائمة الافتراضية؟ (لن تُحفظ حتى تضغط حفظ ونشر)"))
+        return;
+    navItems = NAV_DEFAULT.map(x => ({ ...x }));
+    renderNavEditor();
+    markDirty();
+}
+
+// رسم محرر نصوص الصفحة وترتيب الأقسام
+function renderContentEditor() {
+    const t = contentDraft.texts || {};
+    contentFields.innerHTML = CONTENT_GROUPS.map(([g, f]) => `<h3>${g}</h3><div class="grid">${f.map(([k, l, d]) => `<div class="field"><label>${l}</label><input id="ct_${k}" maxlength="300" value="${esc(t[k] || "")}" placeholder="${esc(d)}"></div>`).join("")}</div>`).join("");
+    heroPrev.innerHTML = imgTag(contentDraft.hero_image);
+    logoPrev.innerHTML = imgTag(contentDraft.logo);
+    secList.innerHTML = secOrder.map((k, i) => `<div class="method-row"><label class="ro"><input type="checkbox" ${secHidden.has(k) ? "" : "checked"} onchange="secToggle('${k}',this.checked)"> ${SEC_LABELS[k]}</label><div class="actions"><button class="btn secondary" onclick="secMove(${i},-1)">▲</button><button class="btn secondary" onclick="secMove(${i},1)">▼</button></div></div>`).join("");
+}
+
+// إظهار أو إخفاء قسم
+function secToggle(k, on) {
+    on ? secHidden.delete(k) : secHidden.add(k);
+    markDirty();
+}
+
+// تحريك قسم بالترتيب
+function secMove(i, d) {
+    const j = i + d;
+    if (j < 0 || j >= secOrder.length)
+        return;
+    [secOrder[i], secOrder[j]] = [secOrder[j], secOrder[i]];
+    readTextsIntoDraft();
+    renderContentEditor();
+    markDirty();
+}
+
+// قراءة النصوص من الحقول وحفظها بالمسودة
+function readTextsIntoDraft() {
+    CONTENT_GROUPS.forEach(([g, f]) => f.forEach(([k]) => {
+        const e = document.getElementById("ct_" + k);
+        if (e) {
+            const v = e.value.trim();
+            if (v)
+                contentDraft.texts[k] = v;
+            else
+                delete contentDraft.texts[k];
+        }
+    }));
+}
+
+// إزالة صورة الغلاف أو الشعار
+function removeSiteImage(kind) {
+    if (!contentDraft[kind] && !(kind === "hero_image" ? heroImgFile : logoFile).files[0]) {
+        return;
+    }
+    if (!confirm("إزالة هذه الصورة؟ (لن تُحذف نهائياً حتى تضغط حفظ ونشر)"))
+        return;
+    contentDraft[kind] = "";
+    (kind === "hero_image" ? heroImgFile : logoFile).value = "";
+    removePv();
+    readTextsIntoDraft();
+    renderContentEditor();
+    markDirty();
+}
+
+// استرجاع النصوص والصور والترتيب الافتراضي
+function resetContent() {
+    if (!confirm("استرجاع كل نصوص وصور وترتيب الصفحة الافتراضي؟ (لن يُحفظ حتى تضغط حفظ ونشر)"))
+        return;
+    contentDraft = {
+        texts: {}, hero_image: "", logo: ""
+    };
+    secOrder = Object.keys(SEC_LABELS);
+    secHidden = new Set();
+    heroImgFile.value = "";
+    logoFile.value = "";
+    removePv();
+    renderContentEditor();
+    markDirty();
+}
+
+// إزالة صور المعاينة الصغيرة
+function removePv() {
+    document.querySelectorAll("#design .pv").forEach(e => e.remove());
+}
+
+// الانتقال لتبويب معين
+function goTab(name) {
+    const b = document.querySelector('.tabs button[onclick*="\'' + name + '\'"]');
+    if (b)
+        b.click();
+}
+
+// جمع المسودة (ألوان، قائمة، محتوى) بصيغة إعدادات جاهزة للحفظ. بالمعاينة بنستعمل روابط مؤقتة للصور
+function collectDraft(forPreview) {
+    const th = {};
+    ["dark", "light"].forEach(n => {
+        Object.keys(THEME_LABELS).forEach(k => {
+            const v = document.getElementById("tc_" + n + "_" + k).value.toLowerCase();
+            if (v !== THEME_DEFAULT[n][k]) {
+                th[n] = th[n] || {};
+                th[n][k] = v;
+            }
+        });
+    });
+    readTextsIntoDraft();
+    const site = {
+        texts: { ...contentDraft.texts }, hero_image: contentDraft.hero_image || "", logo: contentDraft.logo || "", sections: { order: secOrder.slice(), hidden: [...secHidden] }
+    };
+    if (forPreview) {
+        const hf = heroImgFile.files[0], lf = logoFile.files[0];
+        if (hf)
+            site.hero_image = URL.createObjectURL(hf);
+        if (lf)
+            site.logo = URL.createObjectURL(lf);
+    }
+    const nav = navItems.map(n => ({
+        l: n.l.trim(), t: n.t, ...(n.h ? { h: true } : {})
+    }));
+    const sameNav = nav.length === NAV_DEFAULT.length && nav.every((n, i) => n.l === NAV_DEFAULT[i].l && n.t === NAV_DEFAULT[i].t && !n.h);
+    return {
+        theme_colors: Object.keys(th).length ? JSON.stringify(th) : "", theme_default: themeDefSel.value, nav_menu: sameNav ? "" : JSON.stringify(nav), site_content: JSON.stringify(site), contact_cfg: JSON.stringify({
+            waFloat: cfgWaFloat.checked, supportSection: cfgSupport.checked, callBtn: cfgCall.checked
+        })
+    };
+}
+
+// التحقق إنو كل رابط بالقائمة صحيح
+function navValid(nav) {
+    return nav.length > 0 && nav.every(n => n.l.length >= 1 && n.l.length <= 30 && (NAV_TARGETS.some(([v]) => v === n.t) || /^u:https:\/\/[^\s"'<>]+$/.test(n.t)));
+}
+
+// حفظ ونشر: رفع الصور الجديدة وحفظ كل الإعدادات بجدول store_settings (upsert)
+async function publishDesign() {
+    const d = collectDraft(false), nav = d.nav_menu ? JSON.parse(d.nav_menu) : NAV_DEFAULT;
+    if (!navValid(nav)) {
+        alert("تأكد أن كل عنصر في القائمة له اسم، وأن الروابط الخارجية تبدأ بـ https://");
+        return;
+    }
+    const hf = heroImgFile.files[0], lf = logoFile.files[0];
+    let nh = "", nl = "";
+    try {
+        if (hf)
+            nh = await uploadImage(hf, "site");
+        if (lf)
+            nl = await uploadImage(lf, "site", true);
+        const site = JSON.parse(d.site_content);
+        if (nh)
+            site.hero_image = nh;
+        if (nl)
+            site.logo = nl;
+        d.site_content = JSON.stringify(site);
+        const rows = Object.entries(d).map(([key, value]) => ({ key, value }));
+        const { error } = await sb.from("store_settings").upsert(rows);
+        if (error)
+            throw error;
+        const old = jparse(lastSettings.site_content) || {};
+        for (const k of ["hero_image", "logo"])
+            if (old[k] && old[k] !== site[k])
+                await removeImage(old[k]);
+        rows.forEach(r => lastSettings[r.key] = r.value);
+        heroImgFile.value = "";
+        logoFile.value = "";
+        removePv();
+        loadDesign(lastSettings);
+        alert("تم حفظ ونشر التغييرات. تظهر على المتجر فوراً.");
+    }
+    catch (err) {
+        if (nh)
+            await removeImage(nh);
+        if (nl)
+            await removeImage(nl);
+        alert("لم يتم الحفظ: " + (err.message || err));
+    }
+}
+
+// إلغاء التعديلات غير المحفوظة
+function discardDesign() {
+    if (!dirty && !heroImgFile.files[0] && !logoFile.files[0]) {
+        alert("لا توجد تعديلات غير محفوظة.");
+        return;
+    }
+    if (!confirm("إلغاء كل التعديلات غير المحفوظة والعودة لآخر نسخة منشورة؟"))
+        return;
+    heroImgFile.value = "";
+    logoFile.value = "";
+    removePv();
+    loadDesign(lastSettings);
+}
+
+// فتح المعاينة: صفحة المتجر داخل iframe مع ?preview=1
+function openPreview() {
+    pvMode = themeDefSel.value;
+    const f = document.getElementById("pvFrame");
+    document.getElementById("pvModal").hidden = false;
+    f.onload = postPreview;
+    f.src = STORE_FILE + "?preview=1&t=" + Date.now();
+}
+
+// إرسال المسودة لصفحة المعاينة عن طريق postMessage
+function postPreview() {
+    const f = document.getElementById("pvFrame");
+    if (!f.contentWindow || f.getAttribute("src") === "about:blank")
+        return;
+    const s = Object.assign({}, lastSettings, collectDraft(true));
+    s.whatsapp = setWa.value;
+    s.wa_message = setWaMsg.value;
+    s.store_phone = setPhone.value;
+    f.contentWindow.postMessage({
+        type: "dn-preview", settings: s, mode: pvMode
+    }, location.origin === "null" ? "*" : location.origin);
+}
+
+// تغيير وضع المعاينة (فاتح/داكن)
+function setPvMode(m) {
+    pvMode = m;
+    postPreview();
+}
+
+// تغيير حجم المعاينة (موبايل/كمبيوتر)
+function setPvDev(d) {
+    document.getElementById("pvFrame").style.maxWidth = d === "m" ? "400px" : "100%";
+}
+
+// إغلاق المعاينة
+function closePreview() {
+    document.getElementById("pvModal").hidden = true;
+    document.getElementById("pvFrame").src = "about:blank";
+}
+document.getElementById("design").addEventListener("input", e => {
+    if (!e.target.closest("#catImgCard"))
+        markDirty();
+});
+document.getElementById("design").addEventListener("change", e => {
+    if (!e.target.closest("#catImgCard"))
+        markDirty();
+});
+
+// تحذير إذا بدك تسكّر الصفحة وفي تعديلات غير محفوظة
+window.addEventListener("beforeunload", e => {
+    if (dirty) {
+        e.preventDefault();
+        e.returnValue = "";
+    }
+});
+
+// عرض معاينة صغيرة لأي صورة بتنختار من حقول رفع الملفات
+document.addEventListener("change", e => {
+    const t = e.target;
+    if (!(t instanceof HTMLInputElement) || t.type !== "file")
+        return;
+    let pv = t.nextElementSibling && t.nextElementSibling.classList.contains("pv") ? t.nextElementSibling : null;
+    const f = t.files && t.files[0];
+    if (!f || !/^image\//.test(f.type)) {
+        if (pv)
+            pv.remove();
+        return;
+    }
+    if (!pv) {
+        pv = document.createElement("img");
+        pv.className = "pv";
+        pv.alt = "معاينة";
+        t.insertAdjacentElement("afterend", pv);
+    }
+    pv.src = URL.createObjectURL(f);
+});
+
+// ===== طرق الخياطة =====
+// تحميل طرق الخياطة
+async function loadMethods() {
+    const { data, error } = await sb.from("sewing_methods").select("*").order("created_at");
+    if (error) {
+        alert("تعذّر تحميل طرق الخياطة: " + error.message);
+        return;
+    }
+    methods = data.map(r => ({
+        id: r.id, name: r.name, desc: r.description, price: Number(r.extra_price_syp), image: r.image_url, factor: Number(r.fabric_factor || 1), ring: !!r.needs_ring
+    }));
+    renderMethods();
+}
+
+// رسم طرق الخياطة
+function renderMethods() {
+    methodList.innerHTML = methods.length ? methods.map((m, i) => `<div class="method-row"><div class="field"><label>اسم الطريقة</label><input id="mn${i}" value="${esc(m.name)}"></div><div class="field"><label>سعر الخياطة لكل متر (ل.س)</label><input id="mp${i}" type="number" min="0" value="${m.price}"></div><div class="field"><label>مضاعف القماش (× عرض الشباك)</label><input id="mf${i}" type="number" min="1" max="10" step="0.5" value="${m.factor}"></div><div class="field"><label class="ro"><input type="checkbox" id="mr${i}"${m.ring ? " checked" : ""}> يحتاج لون حلق</label></div><div class="actions"><button class="btn secondary" onclick="saveMethod(${i})">حفظ</button><button class="btn danger" onclick="deleteMethod(${i})">حذف</button></div><div class="field" style="grid-column:1/-1"><label>الوصف</label><input id="md${i}" value="${esc(m.desc || "")}"></div><div class="field" style="grid-column:1/-1"><label>الصورة التوضيحية</label>${imgTag(m.image)}<input id="mi${i}" type="file" accept="image/*"></div></div>`).join("") : '<div class="empty">لا توجد طرق خياطة.</div>';
+}
+// حصر معامل القماش بين 1 و 10
+const clampF = v => Math.min(10, Math.max(1, Number(v) || 1));
+
+// حفظ طريقة خياطة (مع رفع صورتها إذا اتغيّرت)
+async function saveMethod(i) {
+    const m = methods[i], row = {
+        name: document.getElementById("mn" + i).value.trim(), description: document.getElementById("md" + i).value.trim(), extra_price_syp: Math.round(Number(document.getElementById("mp" + i).value || 0)), fabric_factor: clampF(document.getElementById("mf" + i).value), needs_ring: document.getElementById("mr" + i).checked
+    };
+    if (!row.name || !(row.extra_price_syp >= 0)) {
+        alert("تأكد من الاسم والسعر");
+        return;
+    }
+    const f = document.getElementById("mi" + i).files[0];
+    let up = "";
+    try {
+        if (f) {
+            up = await uploadImage(f, "sewing");
+            row.image_url = up;
+        }
+        const { error } = await sb.from("sewing_methods").update(row).eq("id", m.id);
+        if (error)
+            throw error;
+        if (up && m.image)
+            await removeImage(m.image);
+        await loadMethods();
+        alert("تم الحفظ.");
+    }
+    catch (err) {
+        if (up)
+            await removeImage(up);
+        alert(err.code === "23505" ? "اسم الطريقة مكرر" : "لم يتم الحفظ: " + (err.message || err));
+    }
+}
+document.getElementById("methodForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const row = {
+        name: methodName.value.trim(), description: methodDesc.value.trim(), extra_price_syp: Math.round(Number(methodPrice.value || 0)), fabric_factor: clampF(methodFactor.value), needs_ring: methodRing.checked
+    };
+    const f = methodImage.files[0], btn = e.submitter;
+    let up = "";
+    if (btn)
+        btn.disabled = true;
+    try {
+        if (f) {
+            up = await uploadImage(f, "sewing");
+            row.image_url = up;
+        }
+        const { error } = await sb.from("sewing_methods").insert(row);
+        if (error)
+            throw error;
+        e.target.reset();
+        methodFactor.value = 2;
+        await loadMethods();
+    }
+    catch (err) {
+        if (up)
+            await removeImage(up);
+        alert(err.code === "23505" ? "هذه الطريقة مضافة مسبقاً" : "لم يتم الحفظ: " + (err.message || err));
+    }
+    finally {
+        if (btn)
+            btn.disabled = false;
+    }
+});
+// ألوان الحلق
+let rings = [];
+
+// تحميل ألوان الحلق
+async function loadRings() {
+    const { data, error } = await sb.from("ring_colors").select("*").order("created_at");
+    if (error) {
+        alert("تعذّر تحميل ألوان الحلق: " + error.message);
+        return;
+    }
+    rings = data;
+    renderRings();
+}
+
+// رسم ألوان الحلق
+function renderRings() {
+    ringList.innerHTML = rings.length ? rings.map((r, i) => `<div class="method-row"><div class="field"><label>الاسم</label><input id="rn${i}" value="${esc(r.name)}" maxlength="30"></div><div class="field"><label>لون العرض</label><input id="rs${i}" type="color" value="${HEXOK(r.swatch) ? r.swatch : "#c9a14a"}"></div><div class="actions"><button class="btn secondary" onclick="saveRing(${i})">حفظ</button><button class="btn danger" onclick="deleteRing(${i})">حذف</button></div></div>`).join("") : '<div class="empty">لا توجد ألوان حلق.</div>';
+}
+
+// حفظ لون حلق
+async function saveRing(i) {
+    const r = rings[i], row = { name: document.getElementById("rn" + i).value.trim(), swatch: document.getElementById("rs" + i).value };
+    if (!row.name) {
+        alert("اكتب اسم اللون");
+        return;
+    }
+    const { error } = await sb.from("ring_colors").update(row).eq("id", r.id);
+    if (error) {
+        alert(error.code === "23505" ? "الاسم مكرر" : "لم يتم الحفظ: " + error.message);
+        return;
+    }
+    await loadRings();
+    alert("تم الحفظ.");
+}
+
+// حذف لون حلق
+async function deleteRing(i) {
+    const r = rings[i];
+    if (!r || !confirm("حذف لون الحلق؟"))
+        return;
+    const { error } = await sb.from("ring_colors").delete().eq("id", r.id);
+    if (error) {
+        alert("لم يتم الحذف: " + error.message);
+        return;
+    }
+    await loadRings();
+}
+document.getElementById("ringForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const { error } = await sb.from("ring_colors").insert({ name: ringName.value.trim(), swatch: ringSwatch.value });
+    if (error) {
+        alert(error.code === "23505" ? "هذا اللون مضاف مسبقاً" : "لم يتم الحفظ: " + error.message);
+        return;
+    }
+    e.target.reset();
+    ringSwatch.value = "#c9a14a";
+    await loadRings();
+});
+
+// إحصائيات الزوار عن طريق دالة visit_stats بقاعدة البيانات
+async function loadVisits() {
+    const { data, error } = await sb.rpc("visit_stats");
+    if (error) {
+        visitStats.innerHTML = '<div class="empty">تعذّر تحميل الإحصائيات: ' + esc(error.message) + '</div>';
+        return;
+    }
+    const n = x => Number(x || 0).toLocaleString("ar-SY");
+    visitStats.innerHTML = [
+        ["اليوم", data.today, data.u_today], ["آخر 7 أيام", data.week, data.u_week], ["آخر 30 يوماً", data.month, data.u_month], ["الإجمالي", data.total, data.u_total]
+    ].map(([l, v, u]) => `<div class="card" style="margin:0"><b>${l}</b><div style="font-size:28px;font-weight:bold">${n(v)}</div><small>زيارة — ${n(u)} زائر مختلف</small></div>`).join("");
+}
+// ===== إشعارات الطلبات الجديدة =====
+// seenIds: الطلبات يلي انعرضت لتجنب التكرار
+const seenIds = new Set(), BASE_TITLE = document.title;
+let newCount = 0, watchOn = false;
+
+// صوت تنبيه
+function beep() {
+    try {
+        const c = new (window.AudioContext || window.webkitAudioContext)(), o = c.createOscillator(), g = c.createGain();
+        o.connect(g);
+        g.connect(c.destination);
+        o.frequency.value = 880;
+        g.gain.value = .1;
+        o.start();
+        setTimeout(() => {
+            o.stop();
+            c.close();
+        }, 350);
+    }
+    catch (e) { }
+}
+
+// إظهار زر تفعيل الإشعارات إذا لسا مو مفعّلة
+function paintNotif() {
+    const b = document.getElementById("notifBtn");
+    if (b)
+        b.textContent = ("Notification" in window) && Notification.permission === "granted" ? "🔔 الإشعارات مفعّلة" : "🔔 تفعيل الإشعارات";
+}
+
+// تسجيل service worker للإشعارات (بس على https)
+async function regSW() {
+    try {
+        if ("serviceWorker" in navigator && location.protocol === "https:")
+            await navigator.serviceWorker.register("daniella_sw.js");
+    }
+    catch (e) { }
+}
+
+// عرض إشعار على الجهاز
+async function showNotif(title, body) {
+    if (!("Notification" in window) || Notification.permission !== "granted")
+        return;
+    try {
+        const reg = ("serviceWorker" in navigator) ? await navigator.serviceWorker.getRegistration() : null;
+        if (reg) {
+            await reg.showNotification(title, {
+                body, tag: "dn-order", renotify: true
+            });
+            return;
+        }
+    }
+    catch (e) { }
+    try {
+        new Notification(title, { body });
+    }
+    catch (e) { }
+}
+
+// طلب إذن الإشعارات من المتصفح
+async function enableNotif() {
+    if (!("Notification" in window)) {
+        alert("هذا المتصفح لا يدعم الإشعارات. ستظهر لك شارة وصوت داخل الصفحة عند وصول طلب جديد.");
+        return;
+    }
+    const p = await Notification.requestPermission();
+    paintNotif();
+    if (p !== "granted") {
+        alert("لم يتم السماح بالإشعارات. يمكنك السماح بها من إعدادات الموقع في المتصفح.");
+        return;
+    }
+    await regSW();
+    showNotif("تم تفعيل الإشعارات ✅", "ستصلك إشعارات الطلبات الجديدة طالما صفحة الإدارة مفتوحة.");
+}
+
+// فتح تبويب الطلبات
+function showOrdersTab() {
+    const b = [...document.querySelectorAll(".tabs button")].find(x => x.textContent.trim() === "الطلبات");
+    tab("orders", b);
+    loadOrders();
+    document.getElementById("newOrderBar").hidden = true;
+}
+
+// عند وصول طلب جديد: شريط تنبيه + صوت + إشعار + تحديث قائمة الطلبات
+function onNewOrder(o) {
+    if (!o || seenIds.has(o.id))
+        return;
+    seenIds.add(o.id);
+    newCount++;
+    document.title = "(" + newCount + ") طلب جديد — " + BASE_TITLE;
+    const bar = document.getElementById("newOrderBar");
+    bar.hidden = false;
+    bar.innerHTML = "🛒 <b>طلب جديد!</b> " + esc(o.customer_name || "") + " — " + esc(o.city || "") + ' <button class="btn" onclick="showOrdersTab()">عرض الطلبات</button>';
+    beep();
+    showNotif("طلب جديد 🛒", (o.customer_name || "") + " — " + (o.city || ""));
+    loadOrders();
+}
+
+// مراقبة الطلبات: اشتراك realtime على جدول orders + فحص كل دقيقة احتياطاً
+function startOrderWatch() {
+    if (watchOn || !sb)
+        return;
+    watchOn = true;
+    try {
+        sb.channel("orders-watch").on("postgres_changes", {
+            event: "INSERT", schema: "public", table: "orders"
+        }, p => onNewOrder(p.new)).subscribe();
+    }
+    catch (e) { }
+    setInterval(async () => {
+        const { data } = await sb.from("orders").select("id,customer_name,city").order("created_at", { ascending: false }).limit(10);
+        (data || []).reverse().forEach(onNewOrder);
+    }, 60000);
+}
+
+// لما ترجع للصفحة بنصفّر عدّاد الطلبات الجديدة
+window.addEventListener("focus", () => {
+    newCount = 0;
+    document.title = BASE_TITLE;
+});
+// تشغيل أولي: التحقق من الدخول ورسم البيانات
+verifyAdmin();
+render();
+/* ===== إدارة القوائم الديناميكية ===== */
+// LISTS: القوائم مع عناصرها
+let LISTS = [];
+
+// تعبئة قائمة أنواع القماش بنموذج الأقمشة
+function fillFabricCat(cur) {
+    const sel = document.getElementById("fabricCategory");
+    if (!sel)
+        return;
+    const v = cur !== undefined ? cur : sel.value;
+    const names = fabTypeNames();
+    const all = v && !names.includes(v) ? [...names, v] : names;
+    sel.innerHTML = '<option value="">— اختر نوع القماش —</option>' + all.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join("");
+    sel.value = v || "";
+}
+
+// تحميل القوائم وعناصرها
+async function loadLists() {
+    const [l, i] = await Promise.all([sb.from("store_lists").select("*").order("sort_order").order("created_at"), sb.from("store_list_items").select("*").order("sort_order").order("created_at")]);
+    if (l.error || i.error) {
+        const m = (l.error || i.error).message;
+        document.getElementById("listsBox").innerHTML = '<div class="card"><p class="status">تعذّر تحميل القوائم: ' + esc(m) + '<br>شغّل ملف daniella_phase9_lists.sql في Supabase أولاً.</p></div>';
+        return;
+    }
+    LISTS = l.data.map(x => ({ ...x, items: i.data.filter(y => y.list_id === x.id) }));
+    fillFabricCat();
+    renderLists();
+    if (typeof renderCatImages === "function")
+        renderCatImages();
+}
+
+// رسم القوائم
+function renderLists() {
+    const open = new Set([...document.querySelectorAll("#listsBox details[open]")].map(d => d.dataset.id));
+    document.getElementById("listsBox").innerHTML = LISTS.length ? LISTS.map((L, li) => `<details class="card" data-id="${L.id}" ${open.has(L.id) ? "open" : ""}>
+ <summary style="cursor:pointer;font-weight:bold;font-size:17px">${esc(L.name)} <small style="font-weight:normal;color:#777">(${L.items.length} عنصر${L.active ? "" : " — مخفية"}${L.is_system ? " — نظامية" : ""})</small></summary>
+ <div class="actions" style="align-items:end;margin-top:12px"><div class="field" style="flex:1;min-width:180px;margin:0"><label>اسم القائمة</label><input id="ln_${L.id}" value="${esc(L.name)}" maxlength="80"></div>
+ <button class="btn secondary" onclick="saveListName(${li})">حفظ الاسم</button><button class="btn secondary" onclick="moveList(${li},-1)" ${li === 0 ? "disabled" : ""}>▲</button><button class="btn secondary" onclick="moveList(${li},1)" ${li === LISTS.length - 1 ? "disabled" : ""}>▼</button>
+ <button class="btn secondary" onclick="toggleList(${li})">${L.active ? "إخفاء" : "إظهار"}</button>${L.is_system ? "" : `<button class="btn danger" onclick="deleteList(${li})">حذف القائمة</button>`}</div>
+ <h3>العناصر</h3>
+ ${L.items.length ? L.items.map((it, ii) => `<div class="method-row" style="grid-template-columns:1fr auto;${it.active ? "" : "opacity:.55"}"><div class="field" style="margin:0"><input id="li_${it.id}" value="${esc(it.name)}" maxlength="80" aria-label="اسم العنصر"></div>
+ <div class="actions" style="margin:0"><button class="btn secondary" onclick="saveItem(${li},${ii})">حفظ</button><button class="btn secondary" onclick="moveItem(${li},${ii},-1)" ${ii === 0 ? "disabled" : ""}>▲</button><button class="btn secondary" onclick="moveItem(${li},${ii},1)" ${ii === L.items.length - 1 ? "disabled" : ""}>▼</button><button class="btn secondary" onclick="toggleItem(${li},${ii})">${it.active ? "إخفاء" : "إظهار"}</button><button class="btn danger" onclick="deleteItem(${li},${ii})">حذف</button></div></div>`).join("") : '<p class="status">لا توجد عناصر بعد.</p>'}
+ <div class="actions" style="align-items:end;margin-top:12px"><div class="field" style="flex:1;min-width:180px;margin:0"><label>إضافة عنصر</label><input id="new_${L.id}" maxlength="80" placeholder="اسم العنصر" onkeydown="if(event.key==='Enter'){event.preventDefault();addItem(${li})}"></div><button class="btn" onclick="addItem(${li})">+ إضافة</button></div>
+ </details>`).join("") : '<div class="card"><p class="status">لا توجد قوائم بعد.</p></div>';
+}
+// رسالة خطأ مناسبة (مثلاً الاسم مكرر)
+const dupMsg = e => e && e.code === "23505" ? "هذا الاسم موجود مسبقاً" : "لم يتم الحفظ: " + (e && e.message);
+document.getElementById("listForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const n = listName.value.trim();
+    if (!n)
+        return;
+    const { error } = await sb.from("store_lists").insert({ name: n, sort_order: LISTS.length ? Math.max(...LISTS.map(x => x.sort_order)) + 1 : 0 });
+    if (error) {
+        alert(dupMsg(error));
+        return;
+    }
+    listName.value = "";
+    await loadLists();
+});
+
+// حفظ اسم قائمة
+async function saveListName(li) {
+    const L = LISTS[li], n = document.getElementById("ln_" + L.id).value.trim();
+    if (!n) {
+        alert("اكتب اسم القائمة");
+        return;
+    }
+    const { error } = await sb.from("store_lists").update({ name: n }).eq("id", L.id);
+    if (error) {
+        alert(dupMsg(error));
+        return;
+    }
+    await loadLists();
+}
+
+// إخفاء أو إظهار قائمة
+async function toggleList(li) {
+    const L = LISTS[li];
+    const { error } = await sb.from("store_lists").update({ active: !L.active }).eq("id", L.id);
+    if (error) {
+        alert(dupMsg(error));
+        return;
+    }
+    await loadLists();
+}
+
+// تحريك قائمة بالترتيب
+async function moveList(li, d) {
+    const j = li + d;
+    if (j < 0 || j >= LISTS.length)
+        return;
+    const a = LISTS[li], b = LISTS[j];
+    let sa = a.sort_order, sb2 = b.sort_order;
+    if (sa === sb2) {
+        sa = li;
+        sb2 = j;
+    }
+    const r = await Promise.all([sb.from("store_lists").update({ sort_order: sb2 }).eq("id", a.id), sb.from("store_lists").update({ sort_order: sa }).eq("id", b.id)]);
+    const er = r.find(x => x.error);
+    if (er) {
+        alert(dupMsg(er.error));
+        return;
+    }
+    await loadLists();
+}
+
+// حذف قائمة
+async function deleteList(li) {
+    const L = LISTS[li];
+    if (L.is_system) {
+        alert("هذه قائمة نظامية، يمكنك إخفاؤها فقط.");
+        return;
+    }
+    if (!confirm("حذف القائمة «" + L.name + "» وكل عناصرها (" + L.items.length + ")؟ لا يمكن التراجع."))
+        return;
+    const { error } = await sb.from("store_lists").delete().eq("id", L.id);
+    if (error) {
+        alert("لم يتم الحذف: " + error.message);
+        return;
+    }
+    await loadLists();
+}
+
+// إضافة عنصر لقائمة
+async function addItem(li) {
+    const L = LISTS[li], inp = document.getElementById("new_" + L.id), n = inp.value.trim();
+    if (!n) {
+        alert("اكتب اسم العنصر");
+        return;
+    }
+    const { error } = await sb.from("store_list_items").insert({
+        list_id: L.id, name: n, sort_order: L.items.length ? Math.max(...L.items.map(x => x.sort_order)) + 1 : 1
+    });
+    if (error) {
+        alert(dupMsg(error));
+        return;
+    }
+    await loadLists();
+}
+
+// حفظ تعديل عنصر
+async function saveItem(li, ii) {
+    const L = LISTS[li], it = L.items[ii], n = document.getElementById("li_" + it.id).value.trim();
+    if (!n) {
+        alert("اكتب الاسم");
+        return;
+    }
+    if (n === it.name)
+        return;
+    const { error } = await sb.rpc("rename_list_item", { p_item_id: it.id, p_new_name: n });
+    if (error) {
+        alert(dupMsg(error));
+        return;
+    }
+    if (L.list_key === "fabric_types")
+        await loadFabrics();
+    await loadLists();
+    if (L.list_key === "fabric_types")
+        await loadCatImages();
+}
+
+// إخفاء أو إظهار عنصر
+async function toggleItem(li, ii) {
+    const it = LISTS[li].items[ii];
+    const { error } = await sb.from("store_list_items").update({ active: !it.active }).eq("id", it.id);
+    if (error) {
+        alert(dupMsg(error));
+        return;
+    }
+    await loadLists();
+}
+
+// تحريك عنصر بالترتيب
+async function moveItem(li, ii, d) {
+    const L = LISTS[li], j = ii + d;
+    if (j < 0 || j >= L.items.length)
+        return;
+    const arr = L.items.slice();
+    [arr[ii], arr[j]] = [arr[j], arr[ii]];
+    const r = await Promise.all(arr.map((x, k) => x.sort_order === k + 1 ? null : sb.from("store_list_items").update({ sort_order: k + 1 }).eq("id", x.id)).filter(Boolean));
+    const er = r.find(x => x.error);
+    if (er) {
+        alert(dupMsg(er.error));
+        return;
+    }
+    await loadLists();
+}
+
+// حذف عنصر
+async function deleteItem(li, ii) {
+    const L = LISTS[li], it = L.items[ii];
+    if (L.list_key === "fabric_types") {
+        const n = fabrics.filter(f => f.category === it.name).length;
+        if (n) {
+            alert("لا يمكن حذف «" + it.name + "» لأن " + n + " قماش مرتبط بها. انقل الأقمشة لنوع آخر أو استخدم «إخفاء».");
+            return;
+        }
+    }
+    if (!confirm("حذف العنصر «" + it.name + "»؟"))
+        return;
+    const { error } = await sb.from("store_list_items").delete().eq("id", it.id);
+    if (error) {
+        alert("لم يتم الحذف: " + error.message);
+        return;
+    }
+    await loadLists();
+}
+
+// ===== البرداية المركّبة (شيفون بالنص + قماشة جوانب) =====
+// التبديل بين التبويبين الفرعيين جوّا قسم الأقمشة
+function fabSub(w) {
+    document.getElementById("fabSubMain").hidden = w !== "main";
+    document.getElementById("fabSubComp").hidden = w !== "comp";
+    document.getElementById("fabSubBtnMain").classList.toggle("active", w === "main");
+    document.getElementById("fabSubBtnComp").classList.toggle("active", w === "comp");
+    if (w === "comp")
+        compRender();
+}
+
+// تحميل الإعدادات العامة (التفعيل والنسبة)
+async function compLoad() {
+    const s = await sb.from("composite_settings").select("*").eq("id", 1).maybeSingle();
+    if (s.error || !s.data) {
+        compCatList.innerHTML = '<div class="empty">تعذّر تحميل البرداية المركّبة. تأكد من تشغيل ملفي composite_all.sql و composite_v2.sql بقاعدة البيانات.</div>';
+        return;
+    }
+    compRatio.value = s.data.middle_ratio;
+    compEnabled.checked = !!s.data.enabled;
+    compRender();
+}
+
+// أسماء الأقسام الموجودة (من قائمة أنواع الأقمشة + أي قسم عليه أقمشة)
+function compCats() {
+    return [...new Set([...(typeof fabTypeNames === "function" ? fabTypeNames() : []), ...fabrics.map(f => f.category)])].filter(Boolean);
+}
+
+// رسم جدول الأقسام وجدول الأقمشة مع خيارات بالنص / جوانب
+function compRender() {
+    if (!window.compCatList)
+        return;
+    const cats = compCats();
+    compCatList.innerHTML = cats.length ? cats.map((c, i) => {
+        const fs = fabrics.filter(f => f.category === c), allM = fs.length && fs.every(f => f.mid), allS = fs.length && fs.every(f => f.sides);
+        return `<div class="method-row"><div class="field"><label>${esc(c)} <small>(${fs.length} قماش)</small></label></div><div class="actions"><label class="ro"><input type="checkbox" ${allM ? "checked" : ""} ${fs.length ? "" : "disabled"} onchange="compSetCat(${i},'use_middle',this.checked)"> بالنص</label><label class="ro"><input type="checkbox" ${allS ? "checked" : ""} ${fs.length ? "" : "disabled"} onchange="compSetCat(${i},'use_sides',this.checked)"> جوانب</label></div></div>`;
+    }).join("") : '<div class="empty">ما في أقسام بعد.</div>';
+    compFabList.innerHTML = fabrics.length ? fabrics.map(f => `<div class="method-row">${/^https:\/\//.test(f.image || "") ? `<img src="${esc(f.image)}" style="width:48px;height:48px;object-fit:cover;border-radius:8px">` : ""}<div class="field"><label>${esc(f.name)} <small>— ${esc(f.category)}</small></label></div><div class="actions"><label class="ro"><input type="checkbox" ${f.mid ? "checked" : ""} onchange="compSetFab('${f.id}','use_middle',this.checked)"> بالنص</label><label class="ro"><input type="checkbox" ${f.sides ? "checked" : ""} onchange="compSetFab('${f.id}','use_sides',this.checked)"> جوانب</label></div></div>`).join("") : '<div class="empty">ما أضفتي أقمشة بعد.</div>';
+}
+
+// تعليم قماش واحد
+async function compSetFab(id, col, v) {
+    const { error } = await sb.from("products").update({ [col]: v }).eq("id", id);
+    if (error) {
+        alert("لم يتم الحفظ: " + error.message);
+    }
+    await loadFabrics();
+}
+
+// تعليم كل أقمشة قسم دفعة وحدة
+async function compSetCat(i, col, v) {
+    const c = compCats()[i];
+    if (!c)
+        return;
+    const { error } = await sb.from("products").update({ [col]: v }).eq("category", c);
+    if (error) {
+        alert("لم يتم الحفظ: " + error.message);
+    }
+    await loadFabrics();
+}
+
+// حفظ الإعدادات العامة
+async function compSaveSet() {
+    const ratio = Number(compRatio.value);
+    if (!(ratio >= 45 && ratio <= 60)) {
+        alert("النسبة لازم تكون بين 45 و60");
+        return;
+    }
+    if (compEnabled.checked && !(fabrics.some(f => f.mid) && fabrics.some(f => f.sides))) {
+        alert("علّمي قماش واحد على الأقل «بالنص» وقماش «جوانب» قبل التفعيل");
+        return;
+    }
+    const { error } = await sb.from("composite_settings").update({ enabled: compEnabled.checked, middle_ratio: ratio, updated_at: new Date().toISOString() }).eq("id", 1);
+    if (error) {
+        alert("لم يتم الحفظ: " + error.message);
+        return;
+    }
+    alert("تم حفظ الإعدادات.");
+}
+  </script>
+</body></html>

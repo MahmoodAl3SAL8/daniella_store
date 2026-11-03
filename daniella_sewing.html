@@ -1,0 +1,1461 @@
+<!doctype html>
+<!--
+  صفحة طرق الخياطة
+  - بتعرض طرق الخياطة والبطانة وألوان الحلق من Supabase
+  - نفس ستايل وثيم الصفحة الرئيسية
+-->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>طرق خياطة الستائر وأنواع البطانة | دانييلا — دمشق القديمة</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<meta name="description" content="طرق خياطة الستائر عند دانييلا في دمشق القديمة: حلق، تكسير، ويفي وغيرها، مع أنواع البطانة وألوان الحلق وأسعارها لكل متر قماش.">
+<link rel="canonical" href="https://daniella-curtains.mahmoodalsalee.workers.dev/daniella_sewing.html">
+<style>
+  /* متغيرات الألوان الأساسية. الجافاسكربت بيغيّرها لما الثيم يتبدّل */
+  :root {
+    --heading: #15191d;
+    --menu-bg: #ffffff;
+    --menu-text: #15191d;
+    --bg: #f4f6f7;
+    --surface: #ffffff;
+    --mist: #e9eef0;
+    --slate: #526b83;
+    --sage: #78958e;
+    --ink-black: #15191d;
+    --ink: #252b30;
+    --muted: #65707a;
+    --line: #dce2e5;
+    --white: #fff;
+    --on-accent: #ffffff;
+    --on-accent2: #202020;
+    --on-dark: #f5f5f5;
+    --hdr: var(--menu-bg);
+  }
+
+  /* لون الهيدر شبه شفاف إذا المتصفح بيدعم color-mix */
+  @supports(background:color-mix(in srgb, red, blue)) {
+    :root {
+      --hdr: color-mix(in srgb,var(--menu-bg) 93%,transparent);
+    }
+  }
+
+  /* إعدادات عامة */
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Tahoma,Arial,sans-serif;
+    line-height: 1.7;
+  }
+
+  button, input, select, textarea {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  /* الشريط العلوي (التوصيل والدفع والهاتف) */
+  .topbar {
+    background: var(--ink-black);
+    color: var(--on-dark);
+    padding: 8px 5%;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .topbar span {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* الهيدر: الشعار والقائمة وزر السلة */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--hdr);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+    padding: 13px 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  .brand {
+    font-family: Georgia,serif;
+    font-size: 30px;
+    letter-spacing: 3px;
+    font-weight: bold;
+    color: var(--heading);
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  .brand small {
+    display: block;
+    text-align: center;
+    font: bold 12px Tahoma;
+    color: var(--slate);
+    letter-spacing: 0;
+    margin-top: 5px;
+  }
+
+  .nav {
+    display: flex;
+    gap: 22px;
+    align-items: center;
+  }
+
+  .nav a {
+    color: var(--menu-text);
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .nav a:hover {
+    color: var(--slate);
+  }
+
+  .cart-btn, .primary, .secondary {
+    border: 0;
+    border-radius: 30px;
+    padding: 11px 20px;
+    background: var(--slate);
+    color: var(--on-accent);
+    font-weight: bold;
+  }
+
+  .cart-btn {
+    white-space: nowrap;
+  }
+
+  /* القسم الرئيسي (الغلاف) */
+  .hero {
+    min-height: 430px;
+    background: linear-gradient(90deg,#111111d9,#11111133),var(--hero-img,url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1800&q=85')) center/cover;
+    display: flex;
+    align-items: center;
+    padding: 55px 8%;
+    color: white;
+  }
+
+  .hero-copy {
+    max-width: 520px;
+  }
+
+  .eyebrow {
+    color: #eeeeee;
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+
+  .hero h1 {
+    font-size: clamp(36px,5vw,62px);
+    line-height: 1.25;
+    margin: 10px 0;
+  }
+
+  .hero p {
+    font-size: 18px;
+    color: #f5f5f5;
+  }
+
+  .hero .primary {
+    background: var(--sage);
+    color: var(--on-accent2);
+    padding: 13px 28px;
+  }
+
+  /* شريط المميزات */
+  .benefits {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    background: var(--mist);
+    padding: 20px 5%;
+    gap: 14px;
+  }
+
+  .benefit {
+    text-align: center;
+    color: var(--heading);
+    border-left: 1px solid var(--line);
+  }
+
+  .benefit:last-child {
+    border: 0;
+  }
+
+  .benefit b {
+    display: block;
+    font-size: 16px;
+  }
+
+  .benefit small {
+    color: var(--muted);
+  }
+
+  /* الأقسام وعناوينها */
+  section {
+    padding: 55px 5%;
+  }
+
+  .section-head {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .section-head h2 {
+    font-size: 29px;
+    margin: 0;
+    color: var(--heading);
+  }
+
+  .section-head p {
+    margin: 5px;
+    color: var(--muted);
+  }
+
+  /* بطاقات تصنيفات الأقمشة */
+  .categories {
+    display: grid;
+    grid-template-columns: repeat(5,1fr);
+    gap: 15px;
+  }
+
+  .category {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 15px;
+    overflow: hidden;
+    text-align: center;
+    cursor: pointer;
+    transition: .2s;
+  }
+
+  .category:hover, .category.active {
+    transform: translateY(-4px);
+    border-color: var(--slate);
+    box-shadow: 0 8px 25px #11111112;
+  }
+
+  .category img {
+    width: 100%;
+    height: 145px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .category b {
+    display: block;
+    padding: 10px;
+    color: var(--heading);
+  }
+
+  /* شريط البحث والترتيب */
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin: 22px 0;
+    flex-wrap: wrap;
+  }
+
+  .toolbar input, .toolbar select, .field input, .field select, .field textarea {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 13px;
+    background: var(--surface);
+    color: var(--ink);
+    width: 100%;
+  }
+
+  .toolbar input {
+    max-width: 300px;
+  }
+
+  /* شبكة الأقمشة */
+  .products {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 18px;
+  }
+
+  .product {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    overflow: hidden;
+  }
+
+  .product img {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+  }
+
+  .product-info {
+    padding: 14px;
+  }
+
+  .product h3 {
+    margin: 0 0 4px;
+    color: var(--heading);
+    font-size: 17px;
+  }
+
+  .product p {
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-size: 13px;
+    min-height: 42px;
+  }
+
+  .price {
+    color: var(--slate);
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .product .primary {
+    width: 100%;
+    padding: 9px;
+  }
+
+  /* قسم الخياطة وخطوات الطلب */
+  .tailoring {
+    background: var(--mist);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: center;
+  }
+
+  .tailoring img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 16px;
+  }
+
+  .tailoring h2 {
+    color: var(--heading);
+    font-size: 30px;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 15px;
+    margin-top: 22px;
+  }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .step strong {
+    display: block;
+    color: var(--slate);
+    font-size: 23px;
+  }
+
+  /* شريط التواصل والفوتر */
+  .contact-strip {
+    background: var(--ink-black);
+    color: var(--on-dark);
+    text-align: center;
+    padding: 32px 5%;
+  }
+
+  .contact-strip h2 {
+    margin: 0 0 8px;
+  }
+
+  .contact-strip p {
+    margin: 0;
+    color: var(--on-dark);
+    opacity: .85;
+  }
+
+  .footer {
+    padding: 25px 5%;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* النوافذ المنبثقة (خيارات المنتج، السلة، إتمام الطلب) */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: #111111cc;
+    z-index: 30;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+  }
+
+  .modal-backdrop.show {
+    display: flex;
+  }
+
+  .modal {
+    background: var(--surface);
+    border-radius: 18px;
+    max-width: 650px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: auto;
+    padding: 24px;
+    position: relative;
+  }
+
+  .modal h2 {
+    margin-top: 0;
+    color: var(--heading);
+  }
+
+  .close {
+    position: absolute;
+    left: 18px;
+    top: 12px;
+    border: 0;
+    background: transparent;
+    font-size: 25px;
+    color: var(--ink-black);
+  }
+
+  .field {
+    margin: 12px 0;
+  }
+
+  .field label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: var(--heading);
+  }
+
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .secondary {
+    background: var(--mist);
+    color: var(--ink-black);
+  }
+
+  .cart-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--line);
+    padding: 10px 0;
+  }
+
+  .cart-line button {
+    border: 0;
+    background: none;
+    color: #a84f55;
+  }
+
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 22px;
+  }
+
+  .notice {
+    background: var(--mist);
+    border: 1px solid var(--line);
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--ink);
+    margin-top: 12px;
+  }
+
+  /* رسالة التنبيه الصغيرة */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--ink-black);
+    color: var(--on-dark);
+    padding: 12px 18px;
+    border-radius: 12px;
+    display: none;
+    z-index: 50;
+  }
+
+  .toast.show {
+    display: block;
+  }
+
+  /* التجاوب مع الشاشات الصغيرة (تابلت وموبايل) */
+  @media(max-width:900px) {
+    .nav {
+      display: none;
+    }
+    .categories {
+      grid-template-columns: repeat(3,1fr);
+    }
+    .products {
+      grid-template-columns: repeat(2,1fr);
+    }
+    .benefits {
+      grid-template-columns: repeat(2,1fr);
+    }
+    .benefit:nth-child(2) {
+      border: 0;
+    }
+    .tailoring {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media(max-width:560px) {
+    .header {
+      padding: 12px 4%;
+    }
+    .brand {
+      font-size: 24px;
+    }
+    .hero {
+      min-height: 390px;
+      padding: 35px 7%;
+      background-position: 55%;
+    }
+    .hero p {
+      font-size: 16px;
+    }
+    .categories {
+      grid-template-columns: repeat(2,1fr);
+    }
+    .category img {
+      height: 115px;
+    }
+    .products {
+      gap: 10px;
+    }
+    .product img {
+      height: 140px;
+    }
+    .product-info {
+      padding: 10px;
+    }
+    .product h3 {
+      font-size: 15px;
+    }
+    .benefits {
+      padding: 16px 4%;
+    }
+    .benefit {
+      font-size: 13px;
+    }
+    .steps {
+      grid-template-columns: 1fr;
+    }
+    .grid2 {
+      grid-template-columns: 1fr;
+    }
+    section {
+      padding: 40px 4%;
+    }
+    .topbar {
+      font-size: 11px;
+    }
+    .modal {
+      padding: 20px 15px;
+    }
+  }
+
+  .ph {
+    width: 100%;
+    height: 190px;
+    background: var(--mist);
+  }
+
+  @media(max-width:560px) {
+    .ph {
+      height: 140px;
+    }
+  }
+
+  /* معرض الأعمال */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 14px;
+  }
+
+  .gallery figure {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    overflow: hidden;
+  }
+
+  .gallery img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .gallery figcaption {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .gallery figcaption b {
+    display: block;
+    color: var(--heading);
+  }
+
+  .gallery figcaption span {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  @media(max-width:900px) {
+    .gallery {
+      grid-template-columns: repeat(2,1fr);
+    }
+  }
+
+  @media(max-width:560px) {
+    .gallery img {
+      height: 150px;
+    }
+  }
+
+  /* دوائر اختيار لون القماش */
+  .swatches {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 6px 0;
+  }
+
+  .product .sw {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 2px solid var(--line);
+    border-radius: 50%;
+    overflow: hidden;
+    background: none;
+  }
+
+  .product .sw.on {
+    border-color: var(--ink-black);
+  }
+
+  .product .sw img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .cname {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .tex {
+    width: 100%;
+    height: 145px;
+  }
+
+  /* خلفيات ملونة لأنواع الأقمشة */
+  .t-all {
+    background: linear-gradient(135deg,var(--mist),var(--line));
+  }
+
+  .t-chiffon {
+    background: repeating-linear-gradient(100deg,var(--surface) 0 14px,var(--mist) 14px 26px,var(--bg) 26px 40px);
+  }
+
+  .t-black {
+    background: repeating-linear-gradient(90deg,var(--ink-black) 0 10px,var(--ink) 10px 18px,var(--ink-black) 18px 30px);
+  }
+
+  .t-velvet {
+    background: linear-gradient(135deg,var(--slate),var(--ink-black));
+  }
+
+  .t-linen {
+    background: repeating-linear-gradient(0deg,var(--line) 0 2px,var(--mist) 2px 5px),repeating-linear-gradient(90deg,#00000008 0 2px,#ffffff30 2px 5px);
+    background-blend-mode: multiply;
+  }
+
+  @media(max-width:560px) {
+    .tex {
+      height: 115px;
+    }
+  }
+
+  /* بطاقات طرق الخياطة */
+  .sewing-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 14px;
+  }
+
+  .sw-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    overflow: hidden;
+  }
+
+  .sw-card img, .sw-card .tex {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .sw-card .in {
+    padding: 12px;
+  }
+
+  .sw-card h3 {
+    margin: 0 0 4px;
+    color: var(--heading);
+  }
+
+  .sw-card p {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .sw-card .pr {
+    font-weight: 700;
+    color: var(--slate);
+  }
+
+  @media(max-width:900px) {
+    .sewing-grid {
+      grid-template-columns: repeat(2,1fr);
+    }
+  }
+
+  @media(max-width:560px) {
+    .sw-card img, .sw-card .tex {
+      height: 130px;
+    }
+  }
+
+  .modal {
+    max-height: 90vh;
+    overflow: auto;
+  }
+
+  label.ro {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 6px 0;
+    font-weight: normal;
+  }
+
+  /* أزرار الهيدر (الثيم والسلة وقائمة الموبايل) */
+  .hdr-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .theme-btn, .menu-btn {
+    border: 1px solid var(--line);
+    background: var(--menu-bg);
+    color: var(--menu-text);
+    border-radius: 30px;
+    padding: 9px 14px;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+
+  .menu-btn {
+    display: none;
+  }
+
+  @media(max-width:900px) {
+    .menu-btn {
+      display: inline-block;
+    }
+    .nav.open {
+      display: flex;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      left: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      background: var(--menu-bg);
+      border-bottom: 1px solid var(--line);
+      padding: 6px 5%;
+    }
+    .nav.open a {
+      padding: 11px 0;
+      border-bottom: 1px solid var(--line);
+    }
+  }
+
+  @media(max-width:560px) {
+    .theme-btn {
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+    .cart-btn {
+      padding: 9px 12px;
+      font-size: 13px;
+    }
+  }
+
+  main {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* زر واتساب العائم */
+  .wa {
+    position: fixed;
+    bottom: calc(20px + env(safe-area-inset-bottom,0px));
+    left: 20px;
+    z-index: 40;
+    width: 58px;
+    height: 58px;
+    padding: 0;
+    border-radius: 50%;
+    background: #25D366;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,.22);
+    transition: transform .2s ease,box-shadow .2s ease;
+  }
+
+  .wa:hover, .wa:focus-visible {
+    transform: scale(1.08);
+    box-shadow: 0 6px 20px rgba(0,0,0,.3);
+  }
+
+  .wa:active {
+    transform: scale(.96);
+  }
+
+  .wa svg {
+    display: block;
+    width: 30px;
+    height: 30px;
+    flex: none;
+  }
+
+  @media(max-width:560px) {
+    .wa {
+      width: 52px;
+      height: 52px;
+      left: 14px;
+      bottom: calc(14px + env(safe-area-inset-bottom,0px));
+    }
+    .wa svg {
+      width: 27px;
+      height: 27px;
+    }
+  }
+
+  /* أزرار التواصل */
+  .contact-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .cbtn {
+    padding: 11px 22px;
+    border-radius: 30px;
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  .cwa {
+    background: #25d366;
+    color: #fff;
+  }
+
+  .ccall {
+    background: var(--sage);
+    color: var(--on-accent2);
+  }
+
+  /* اختيار لون الحلقات */
+  .ringopts {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .ringopt {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--line);
+    border-radius: 30px;
+    padding: 7px 14px;
+    cursor: pointer;
+    background: var(--surface);
+    font-weight: normal;
+  }
+
+  .ringopt input {
+    accent-color: var(--slate);
+  }
+
+  .ringopt:has(input:checked) {
+    border-color: var(--slate);
+    box-shadow: 0 0 0 2px var(--slate);
+  }
+
+  .rdot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid #0003;
+    display: inline-block;
+  }
+
+  @media(max-width:560px) {
+    .header {
+      padding: 10px 4%;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+    .brand {
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+    .brand small {
+      font-size: 10px;
+    }
+    .hdr-actions {
+      gap: 5px;
+    }
+    .theme-btn, .menu-btn, .cart-btn {
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+  }
+
+  .cwa {
+    background: #1a7f45;
+  }
+
+  .field input[type=radio], .field input[type=checkbox] {
+    width: auto;
+    padding: 0;
+    margin: 0;
+  }
+
+  .wa {
+    z-index: 30;
+  }
+
+  .modal-backdrop {
+    z-index: 60;
+  }
+
+  .toast {
+    z-index: 70;
+  }
+  
+    /* القوائم الفرعية تحت عناصر القائمة */
+    .nav-dd { position: relative; }
+    .dd-menu { display: none; position: absolute; top: 100%; right: 0; min-width: 190px; flex-direction: column; background: var(--menu-bg); border: 1px solid var(--line); border-radius: 12px; padding: 6px; box-shadow: 0 8px 25px #11111122; z-index: 20; }
+    .dd-menu a { display: block; padding: 9px 12px; border-radius: 8px; white-space: nowrap; }
+    .dd-menu a:hover { background: var(--mist); }
+    .nav-dd:hover .dd-menu, .nav-dd:focus-within .dd-menu { display: flex; }
+    @media(max-width:900px) {
+      .nav.open .nav-dd { display: block; }
+      .nav.open .dd-menu { display: flex; position: static; border: 0; box-shadow: none; background: transparent; padding: 0 16px 0 0; min-width: 0; }
+      .nav.open .dd-menu a { padding: 9px 0; font-size: 13px; border-radius: 0; }
+    }
+
+/* ===== لمسة جمالية: ظلال وحركات وإطار فوكس (بتتبع ألوان الثيم من الأدمن) ===== */
+.header { box-shadow: 0 2px 16px rgba(0,0,0,.09); }
+.primary, .secondary, .cart-btn, .theme-btn, .menu-btn, .cbtn { box-shadow: 0 4px 14px rgba(0,0,0,.18); transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
+.primary:hover, .secondary:hover, .cart-btn:hover, .theme-btn:hover, .menu-btn:hover, .cbtn:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.24); filter: brightness(1.05); }
+.primary:active, .secondary:active, .cart-btn:active, .theme-btn:active, .menu-btn:active, .cbtn:active { transform: translateY(0) scale(.98); box-shadow: 0 3px 8px rgba(0,0,0,.22); }
+.product, .category, .sw-card, .gallery figure, .step { box-shadow: 0 4px 16px rgba(0,0,0,.08); transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease; }
+.product:hover, .sw-card:hover, .gallery figure:hover, .step:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0,0,0,.15); }
+.category:hover, .category.active { box-shadow: 0 12px 28px rgba(0,0,0,.17); }
+.modal { box-shadow: 0 24px 60px rgba(0,0,0,.38); }
+:root[data-theme="dark"] .product, :root[data-theme="dark"] .category, :root[data-theme="dark"] .sw-card, :root[data-theme="dark"] .gallery figure, :root[data-theme="dark"] .step { box-shadow: 0 6px 20px rgba(0,0,0,.45); }
+:root[data-theme="dark"] .product:hover, :root[data-theme="dark"] .sw-card:hover, :root[data-theme="dark"] .gallery figure:hover, :root[data-theme="dark"] .step:hover { box-shadow: 0 16px 34px rgba(0,0,0,.6); }
+@supports(background:color-mix(in srgb, red, blue)) {
+  .primary, .cart-btn { box-shadow: 0 6px 16px color-mix(in srgb, var(--slate) 40%, transparent); }
+  .primary:hover, .cart-btn:hover { box-shadow: 0 12px 24px color-mix(in srgb, var(--slate) 50%, transparent); }
+}
+.field input, .field select, .field textarea, .toolbar input { transition: border-color .18s ease, box-shadow .18s ease; }
+.field input:focus, .field select:focus, .field textarea:focus, .toolbar input:focus { outline: none; border-color: var(--slate); box-shadow: 0 0 0 3px rgba(150,150,150,.28); }
+@supports(background:color-mix(in srgb, red, blue)) {
+  .field input:focus, .field select:focus, .field textarea:focus, .toolbar input:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--slate) 30%, transparent); }
+}
+button:focus-visible, a:focus-visible { outline: 2px solid var(--slate); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .primary, .secondary, .cart-btn, .theme-btn, .menu-btn, .cbtn, .product, .category, .sw-card, .gallery figure, .step { transition: none; }
+  .product:hover, .sw-card:hover, .gallery figure:hover, .step:hover, .primary:hover, .secondary:hover, .cart-btn:hover, .theme-btn:hover, .menu-btn:hover, .cbtn:hover { transform: none; }
+}
+</style>
+<script>
+// ألوان الثيمين الافتراضية (dark و light). كل مفتاح لون بيتحول لمتغير CSS
+const THEME_DEFAULT = { dark: {
+        bg: "#f4f6f7", text: "#252b30", heading: "#15191d", accent: "#526b83", accent2: "#78958e", menuBg: "#ffffff", menuText: "#15191d", surface: "#ffffff", line: "#dce2e5", mist: "#e9eef0", dark: "#15191d", muted: "#65707a"
+    }, light: {
+        bg: "#faf6ec", text: "#4a3b2a", heading: "#5b4630", accent: "#a8812e", accent2: "#d9bf86", menuBg: "#fffdf8", menuText: "#5b4630", surface: "#fffdf8", line: "#e7dcc3", mist: "#f3ead6", dark: "#6b5238", muted: "#7d6d56"
+    } };
+// ربط كل مفتاح لون بمتغير CSS يلي بيغيّره
+const THEME_VARS = {
+    bg: "--bg", text: "--ink", heading: "--heading", accent: "--slate", accent2: "--sage", menuBg: "--menu-bg", menuText: "--menu-text", surface: "--surface", line: "--line", mist: "--mist", dark: "--ink-black", muted: "--muted"
+};
+// روابط القائمة الافتراضية: l = النص، t = الهدف (s: قسم بالصفحة، p: صفحة ثانية، u: رابط خارجي)
+const NAV_DEFAULT = [
+    { l: "الرئيسية", t: "s:home" }, { l: "الأقمشة", t: "s:fabrics" }, { l: "طرق الخياطة", t: "p:sewing" }, { l: "البرداية المركّبة", t: "p:composite" }, { l: "أعمالنا", t: "s:gallery" }, { l: "طريقة الطلب", t: "s:how" }, { l: "تواصل معنا", t: "s:contact" }
+];
+// أسماء الصفحات يلي بتنربط فيها القائمة
+const PAGES = { sewing: "daniella_sewing.html", composite: "daniella_composite.html", store: "index.html" };
+// true إذا الصفحة مفتوحة جوّا نافذة المعاينة بلوحة التحكم (?preview=1)
+let PREVIEW = /[?&]preview=1/.test(location.search) && window.parent !== window;
+// حالة الثيم: الاسم الحالي، الألوان المخصصة، والوضع الافتراضي يلي حدده صاحب المحل
+let THEME_NAME = "dark", THEME_CUSTOM = null, THEME_ADMIN_DEF = "dark";
+// للتأكد إنو اللون بصيغة #rrggbb
+const HEX = /^#[0-9a-fA-F]{6}$/;
+
+// حساب سطوع اللون (luminance)
+function lum(h) {
+    const n = parseInt(h.slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map(v => {
+        v /= 255;
+        return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4);
+    });
+    return .2126 * c[0] + .7152 * c[1] + .0722 * c[2];
+}
+
+// بيختار لون الخط (أسود أو أبيض) يلي بيبين أوضح فوق لون الخلفية
+function onColor(h) {
+    const L = lum(h);
+    return (L + .05) / (.0144 + .05) > 1.05 / (L + .05) ? "#202020" : "#ffffff";
+}
+
+// قراءة من localStorage بدون ما يوقف الكود إذا المتصفح منع الوصول
+function readLS(k) {
+    try {
+        return localStorage.getItem(k);
+    }
+    catch (e) {
+        return null;
+    }
+}
+
+// تطبيق الثيم: بيدمج الألوان الافتراضية مع المخصصة وبيكتبها كمتغيرات CSS على عنصر <html>
+function applyTheme(name) {
+    THEME_NAME = name;
+    const t = Object.assign({}, THEME_DEFAULT[name]), c = THEME_CUSTOM && THEME_CUSTOM[name];
+    if (c && typeof c === "object")
+        for (const k in t)
+            if (HEX.test(c[k] || ""))
+                t[k] = c[k];
+    const r = document.documentElement;
+    for (const k in THEME_VARS)
+        r.style.setProperty(THEME_VARS[k], t[k]);
+    r.style.setProperty("--on-accent", onColor(t.accent));
+    r.style.setProperty("--on-accent2", onColor(t.accent2));
+    r.style.setProperty("--on-dark", onColor(t.dark));
+    r.dataset.theme = name;
+    paintThemeBtn();
+}
+
+// اختيار الثيم: اختيار الزائر المحفوظ، وإذا ما في بياخد الافتراضي
+function pickTheme() {
+    const u = readLS("dn_theme");
+    applyTheme(u === "light" || u === "dark" ? u : THEME_ADMIN_DEF);
+}
+
+// قراءة إعدادات الثيم المحفوظة محلياً وتشغيله أول ما تنفتح الصفحة
+function initTheme() {
+    try {
+        THEME_CUSTOM = JSON.parse(readLS("dn_theme_colors") || "null");
+    }
+    catch (e) { }
+    THEME_ADMIN_DEF = readLS("dn_theme_default") === "light" ? "light" : "dark";
+    pickTheme();
+}
+
+// تحديث الثيم من إعدادات قاعدة البيانات وتخزينها محلياً للزيارة الجاية
+function themeFromSettings(S) {
+    if (PREVIEW)
+        return;
+    let c = null;
+    try {
+        c = JSON.parse(S.theme_colors || "null");
+    }
+    catch (e) { }
+    THEME_CUSTOM = c && typeof c === "object" ? c : null;
+    THEME_ADMIN_DEF = S.theme_default === "light" ? "light" : "dark";
+    try {
+        localStorage.setItem("dn_theme_colors", JSON.stringify(THEME_CUSTOM));
+        localStorage.setItem("dn_theme_default", THEME_ADMIN_DEF);
+    }
+    catch (e) { }
+    pickTheme();
+}
+
+// زر التبديل بين الوضع الفاتح والداكن
+function toggleTheme() {
+    const n = THEME_NAME === "light" ? "dark" : "light";
+    if (!PREVIEW) {
+        try {
+            localStorage.setItem("dn_theme", n);
+        }
+        catch (e) { }
+    }
+    applyTheme(n);
+}
+
+// تغيير نص زر الثيم حسب الوضع الحالي
+function paintThemeBtn() {
+    const b = document.getElementById("themeBtn");
+    if (b)
+        b.textContent = THEME_NAME === "light" ? "🌙 داكن" : "☀️ فاتح";
+}
+
+// بعد ما تنحمل الصفحة بنحدّث نص الزر
+document.addEventListener("DOMContentLoaded", paintThemeBtn);
+
+// فتح وإغلاق قائمة الموبايل
+function toggleMenu() {
+    document.querySelectorAll(".nav").forEach(n => n.classList.toggle("open"));
+}
+// تنظيف النص من رموز HTML (حماية من XSS) — نسخة بدائية لحد ما تنعرّف esc
+const escN = s => String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+}[c]));
+
+// تحويل هدف عنصر القائمة (s: / p: / u:) لرابط فعلي مع التحقق إنو آمن
+function navHref(t) {
+    const i = String(t).indexOf(":"), k = String(t).slice(0, i), v = String(t).slice(i + 1);
+    if (k === "s" && /^[a-z-]+$/.test(v))
+        return (window.IS_STORE ? "" : PAGES.store) + "#" + v;
+    if (k === "p" && PAGES[v])
+        return PAGES[v];
+    if (k === "u" && /^https:\/\/[^\s"'<>]+$/.test(v))
+        return v;
+    return "#";
+}
+
+// قراءة القائمة المخزنة (JSON) والتأكد من شكلها، وإلا بنرجع للقائمة الافتراضية
+function parseNav(v) {
+    try {
+        const a = JSON.parse(v || "null");
+        if (Array.isArray(a) && a.length && a.every(x => x && typeof x.l === "string" && typeof x.t === "string"))
+            return a;
+    }
+    catch (e) { }
+    return NAV_DEFAULT;
+}
+
+// رسم روابط القائمة بكل عناصر .nav (بحد أقصى 12 رابط، والمخفي بيتخطى)
+function renderNav(v) {
+    const a = parseNav(v).filter(i => !i.h).slice(0, 12);
+    document.querySelectorAll(".nav").forEach(n => {
+        n.innerHTML = a.map(i => {
+            // القوائم الفرعية (i.c): بتظهر تحت العنصر الرئيسي
+            const k = (Array.isArray(i.c) ? i.c : []).filter(x => x && typeof x.l === "string" && typeof x.t === "string" && !x.h).slice(0, 12);
+            if (!k.length)
+                return `<a href="${escN(navHref(i.t))}">${escN(i.l)}</a>`;
+            return `<div class="nav-dd"><a href="${escN(navHref(i.t))}">${escN(i.l)} ▾</a><div class="dd-menu">${k.map(c => `<a href="${escN(navHref(c.t))}">${escN(c.l)}</a>`).join("")}</div></div>`;
+        }).join("");
+        n.onclick = e => {
+            if (e.target.tagName === "A")
+                n.classList.remove("open");
+        };
+    });
+}
+// بنقبل بس روابط https للصور (أو blob: وقت المعاينة)
+const HTTPS_URL = /^https:\/\/[^\s"'()<>\\]+$/;
+const imgOk = u => HTTPS_URL.test(u || "") || (PREVIEW && /^blob:[^\s"'()<>\\]+$/.test(u || ""));
+// أقسام الصفحة الرئيسية بترتيبها الأصلي
+const SECTIONS = ["home", "benefits", "fabrics", "tailoring", "gallery", "how", "contact"];
+
+// JSON.parse بدون أخطاء: بيرجع null إذا النص غلط
+function jparse(v) {
+    try {
+        return JSON.parse(v || "null");
+    }
+    catch (e) {
+        return null;
+    }
+}
+
+// تطبيق المحتوى المخصص: النصوص (data-c) وصورة الغلاف والشعار وترتيب الأقسام وإخفائها
+function applyContent(v) {
+    const c = jparse(v) || {};
+    const t = c.texts || {};
+    document.querySelectorAll("[data-c]").forEach(e => {
+        const x = t[e.dataset.c];
+        if (typeof x === "string" && x.trim())
+            e.textContent = x.trim().slice(0, 300);
+    });
+    if (imgOk(c.hero_image))
+        document.documentElement.style.setProperty("--hero-img", 'url("' + c.hero_image + '")');
+    const lg = document.getElementById("brandLogo");
+    if (lg && imgOk(c.logo)) {
+        lg.src = c.logo;
+        lg.style.display = "";
+        document.querySelectorAll(".brand [data-c]").forEach(e => e.style.display = "none");
+    }
+    const s = c.sections;
+    if (s && Array.isArray(s.order)) {
+        const hid = Array.isArray(s.hidden) ? s.hidden : [];
+        SECTIONS.forEach(k => {
+            const e = document.querySelector('[data-sec="' + k + '"]');
+            if (!e)
+                return;
+            const i = s.order.indexOf(k);
+            e.style.order = i < 0 ? SECTIONS.indexOf(k) : i;
+            e.style.display = hid.includes(k) ? "none" : "";
+        });
+    }
+}
+
+// بناء رابط واتساب (wa.me) من الرقم والرسالة الجاهزة
+function waLink(S) {
+    const n = String(S.whatsapp || "").replace(/\D/g, "");
+    if (n.length < 8 || n.length > 15)
+        return "";
+    return "https://wa.me/" + n + "?text=" + encodeURIComponent(String(S.wa_message || "مرحباً، أريد الاستفسار عن ستائر دانييلا").slice(0, 300));
+}
+
+// زر واتساب العائم: بيظهر أو بيختفي حسب الإعدادات
+function applyWhatsApp(S) {
+    const cfg = jparse(S.contact_cfg) || {}, link = waLink(S);
+    let a = document.getElementById("waBtn");
+    if (!link || cfg.waFloat === false) {
+        if (a)
+            a.remove();
+        return;
+    }
+    if (!a) {
+        a = document.createElement("a");
+        a.id = "waBtn";
+        a.className = "wa";
+        a.target = "_blank";
+        a.rel = "noopener";
+        document.body.appendChild(a);
+    }
+    a.innerHTML = '<svg viewBox="0 0 24 24" width="30" height="30" fill="#fff" aria-hidden="true" focusable="false"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
+    a.setAttribute("aria-label", "تواصل معنا عبر واتساب");
+    a.title = "واتساب";
+    a.href = link;
+}
+
+// أزرار قسم التواصل (واتساب واتصال مباشر)
+function applyContact(S) {
+    const cfg = jparse(S.contact_cfg) || {}, box = document.getElementById("contactBtns"), sec = document.getElementById("contact");
+    if (!box)
+        return;
+    const link = waLink(S), tel = String(S.store_phone || "").replace(/[^\d+]/g, ""), b = [];
+    if (link)
+        b.push(`<a class="cbtn cwa" target="_blank" rel="noopener" href="${escN(link)}">💬 تواصل عبر واتساب</a>`);
+    if (cfg.callBtn !== false && tel.length >= 6)
+        b.push(`<a class="cbtn ccall" href="tel:${escN(tel)}">📞 اتصال مباشر</a>`);
+    box.innerHTML = b.join("");
+    if (sec && cfg.supportSection === false)
+        sec.style.display = "none";
+}
+
+// تطبيق كل الإعدادات المنشورة دفعة وحدة (ما بتشتغل بوضع المعاينة)
+function liveApply(S) {
+    if (PREVIEW)
+        return;
+    themeFromSettings(S);
+    renderNav(S.nav_menu);
+    applyContent(S.site_content);
+    applyWhatsApp(S);
+    applyContact(S);
+}
+
+// تطبيق إعدادات المعاينة المرسلة من لوحة التحكم قبل ما تنشر
+function previewApply(d) {
+    PREVIEW = true;
+    const S = d.settings || {};
+    const c = jparse(S.theme_colors);
+    THEME_CUSTOM = c && typeof c === "object" ? c : null;
+    applyTheme(d.mode === "light" ? "light" : "dark");
+    renderNav(S.nav_menu);
+    applyContent(S.site_content);
+    applyWhatsApp(S);
+    applyContact(S);
+}
+
+// استقبال رسائل المعاينة من لوحة التحكم (بس من نفس الموقع)
+window.addEventListener("message", e => {
+    if (e.origin !== location.origin || window.parent === window)
+        return;
+    const d = e.data;
+    if (!d || d.type !== "dn-preview")
+        return;
+    previewApply(d);
+});
+
+// تسجيل الزيارة مرة وحدة بالجلسة عن طريق دالة log_visit بقاعدة البيانات
+function logVisit(page) {
+    try {
+        if (PREVIEW || typeof sb === "undefined" || !sb)
+            return;
+        const k = "dn_v_" + page;
+        if (sessionStorage.getItem(k))
+            return;
+        sessionStorage.setItem(k, "1");
+        let v = localStorage.getItem("dn_vid");
+        if (!v) {
+            v = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
+            localStorage.setItem("dn_vid", v);
+        }
+        sb.rpc("log_visit", { p_visitor: v, p_page: page }).then(() => { }, () => { });
+    }
+    catch (e) { }
+}
+// تشغيل الثيم فوراً
+initTheme();
+  </script>
+</head>
+<body>
+  <!-- الشريط العلوي -->
+  <div class="topbar"><span id="topPhone" style="display:none"></span><span data-c="top1">🚚 التوصيل حسب المنطقة</span><span data-c="top2">💳 شام كاش أو الدفع عند الاستلام</span></div>
+  <!-- الهيدر -->
+  <header class="header"><a class="brand" href="index.html"><img id="brandLogo" alt="" style="display:none;max-height:46px"><span data-c="brand">DANIELLA</span><small data-c="brandSub">دانييلا للستائر والديكور</small></a>
+    <nav class="nav"></nav>
+    <span class="hdr-actions"><button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️ فاتح</button><a class="cart-btn" href="index.html#fabrics" style="text-decoration:none">🛒 اطلبي الآن</a><button class="menu-btn" onclick="toggleMenu()">☰</button></span>
+  </header>
+  <!-- الأقسام: طرق الخياطة، ألوان الحلق، البطانة (بتتعبّى من الجافاسكربت) -->
+  <main>
+    <section>
+      <div class="section-head">
+        <h2>طرق الخياطة</h2>
+        <p>اختاري الطريقة المناسبة لستائرك. الأسعار لكل متر قماش.</p>
+      </div>
+      <div class="sewing-grid" id="sewingList"></div>
+    </section>
+    <section id="ringSec" style="display:none">
+      <div class="section-head">
+        <h2>ألوان الحلق</h2>
+        <p>متوفرة مع خياطة الحلق فقط.</p>
+      </div>
+      <div class="sewing-grid" id="ringList"></div>
+    </section>
+    <section>
+      <div class="section-head">
+        <h2>البطانة</h2>
+        <p>اختيارية. أنواعها وألوانها وأسعارها لكل متر قماش.</p>
+      </div>
+      <div class="sewing-grid" id="liningList"></div>
+    </section>
+    <section style="text-align:center"><a class="primary" href="index.html#fabrics" style="display:inline-block;text-decoration:none">اختاري القماش وابدئي الطلب ←</a></section>
+  </main>
+  <!-- الفوتر -->
+  <footer class="footer">© <span id="year"></span> <span data-c="footer">DANIELLA — دانييلا للستائر والديكور. جميع الحقوق محفوظة.</span></footer>
+
+<script>
+// الاتصال بـ Supabase. المفتاح هون من نوع publishable (مخصص للعلن) والحماية الفعلية من سياسات RLS بالقاعدة
+const sb = window.supabase ? window.supabase.createClient("https://xlegdzwjmwmayzksmbns.supabase.co", "sb_publishable_807CdfSocWri1gU6bh2T-Q_VUG5hBwU") : null;
+// تنظيف النص من رموز HTML قبل ما ندخله للصفحة (منع XSS)
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+}[c]));
+// بنقبل بس روابط https
+const safeUrl = u => /^https:\/\//.test(u || "") ? u : "";
+// تنسيق السعر بالليرة السورية
+const money = n => new Intl.NumberFormat('ar-SY').format(n) + " ل.س";
+// ===== سكربت صفحة طرق الخياطة =====
+// رسم القائمة الافتراضية فوراً قبل ما توصل الإعدادات من القاعدة
+renderNav();
+
+// تحميل طرق الخياطة والبطانة وألوانها وألوان الحلق والإعدادات دفعة وحدة وعرضها
+async function load() {
+    const sw = document.getElementById('sewingList'), ln = document.getElementById('liningList');
+    if (!sb) {
+        sw.innerHTML = ln.innerHTML = '<p class="empty" style="grid-column:1/-1">تعذّر الاتصال بقاعدة البيانات.</p>';
+        return;
+    }
+    const [m, l, lc, st, rc] = await Promise.all([sb.from("sewing_methods").select("*").eq("active", true).order("created_at"), sb.from("lining_options").select("*").eq("active", true).order("created_at"), sb.from("lining_colors").select("*").eq("active", true).order("created_at"), sb.from("store_settings").select("*"), sb.from("ring_colors").select("*").eq("active", true).order("created_at")]);
+    sw.innerHTML = (m.data || []).length ? m.data.map(r => `<div class="sw-card">${safeUrl(r.image_url) ? `<img src="${esc(safeUrl(r.image_url))}" alt="${esc(r.name)}">` : '<div class="tex t-all"></div>'}<div class="in"><h3>${esc(r.name)}</h3><p>${esc(r.description)}</p><p><b>تحتاج قماشاً بمقدار ${Number(r.fabric_factor || 1)} × عرض الشباك</b></p><div class="pr">${money(r.extra_price_syp)} / متر</div></div></div>`).join('') : '<p class="empty" style="grid-column:1/-1">سيتم عرض طرق الخياطة قريباً.</p>';
+    const rings = rc.data || [];
+    if (rings.length) {
+        document.getElementById('ringSec').style.display = '';
+        document.getElementById('ringList').innerHTML = rings.map(r => `<div class="sw-card"><div class="in" style="display:flex;gap:10px;align-items:center"><span style="width:26px;height:26px;border-radius:50%;background:${/^#[0-9a-fA-F]{6}$/.test(r.swatch) ? r.swatch : '#c9a14a'};border:1px solid var(--line)"></span><h3 style="margin:0">${esc(r.name)}</h3></div></div>`).join('');
+    }
+    ln.innerHTML = (l.data || []).length ? l.data.map(r => {
+        const cs = (lc.data || []).filter(c => c.lining_id === r.id);
+        return `<div class="sw-card"><div class="in"><h3>${esc(r.name)}</h3><div class="pr">${money(r.price_syp)} / متر</div>${cs.length ? `<p style="margin-top:8px">الألوان: ${cs.map(c => esc(c.color_name)).join('، ')}</p>` : ''}</div></div>`;
+    }).join('') : '<p class="empty" style="grid-column:1/-1">سيتم عرض أنواع البطانة قريباً.</p>';
+    const S = {};
+    (st.data || []).forEach(r => S[r.key] = r.value);
+    liveApply(S);
+    if (S.store_phone) {
+        const e = document.getElementById('topPhone');
+        e.textContent = '☎️ ' + S.store_phone;
+        e.style.display = '';
+    }
+}
+// سنة الفوتر + أول تحميل وتسجيل الزيارة
+document.getElementById('year').textContent = new Date().getFullYear();
+load();
+logVisit("sewing");
+  </script>
+
+</body></html>
