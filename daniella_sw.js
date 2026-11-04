@@ -1,50 +1,46 @@
-// Service Worker لمتجر دانييلا: يخلّي الموقع يتثبّت كتطبيق، ويدعم إشعارات لوحة التحكم.
-// الاستراتيجية: الشبكة أولاً (عشان الأقمشة والأسعار تضل محدّثة)، والكاش فقط إذا انقطع النت.
-// طلبات Supabase والمكتبات الخارجية بتمرّ مباشرة بدون كاش.
-const CACHE = "daniella-v1";
-const PRECACHE = ["offline.html", "icon-192.png", "icon-512.png"];
+/* daniella_sw.js
+ * - ما بيخزّن الصفحات بالكاش أبداً، فالزبون دايماً بيشوف آخر نسخة
+ * - بيمسح أي كاش قديم تركته النسخ السابقة
+ * - بيدعم الإشعارات (صفحة الأدمن)
+ */
+const SW_VERSION = "dn-sw-2026-11-04-1"; // غيّره مع كل نشر إذا بدك تجبر المتصفحات تحدّث الـ SW
 
-self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
+self.addEventListener("install", () => {
+  self.skipWaiting(); // فعّل النسخة الجديدة فوراً
 });
 
-self.addEventListener("activate", (e) => {
-  e.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
+self.addEventListener("activate", (event) => {
+  event.waitUntil((async () => {
+    // احذف كل الكاشات القديمة
+    const keys = await caches.keys();
+    await Promise.all(keys.map((k) => caches.delete(k)));
+    await self.clients.claim(); // سيطر على الصفحات المفتوحة
+  })());
 });
 
-self.addEventListener("fetch", (e) => {
-  const req = e.request;
+// دايماً من الشبكة، وتجاوز كاش المتصفح للصفحات (HTML)
+self.addEventListener("fetch", (event) => {
+  const req = event.request;
+  if (req.method !== "GET") return;
+
   const url = new URL(req.url);
-  if (req.method !== "GET" || url.origin !== self.location.origin) return;
-  // لوحة التحكم ما بتنخزّن أبداً
-  if (url.pathname.endsWith("/admin.html")) return;
+  // لا تتدخل بطلبات Supabase أو أي دومين ثاني
+  if (url.origin !== self.location.origin) return;
 
-  e.respondWith(
-    fetch(req)
-      .then((res) => {
-        if (res.ok) {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy));
-        }
-        return res;
-      })
-      .catch(() =>
-        caches.match(req).then((hit) => hit || (req.mode === "navigate" ? caches.match("offline.html") : Response.error()))
-      )
-  );
+  if (req.mode === "navigate" || req.destination === "document") {
+    event.respondWith(fetch(req, { cache: "no-store" }).catch(() => fetch(req)));
+  }
+  // باقي الملفات (صور، manifest...) بتمشي طبيعي بدون تدخل
 });
 
-// الضغط على الإشعار بيفتح اللوحة أو يرجّع التركيز عليها
-self.addEventListener("notificationclick", (e) => {
-  e.notification.close();
-  e.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
-      if (list.length) return list[0].focus();
-      return self.clients.openWindow("./");
-    })
-  );
+// الضغط على الإشعار بيفتح/بيرجّع الصفحة
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const list = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    for (const c of list) {
+      if ("focus" in c) return c.focus();
+    }
+    if (self.clients.openWindow) return self.clients.openWindow("./");
+  })());
 });
