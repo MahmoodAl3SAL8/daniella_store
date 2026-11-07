@@ -1,0 +1,87 @@
+/* daniella_fx.css — طبقة التصميم المشتركة (بتتحمّل بعد ستايل كل صفحة وبتتبع ألوان الثيم) */
+:root { --fx-ease: cubic-bezier(.22, 1, .36, 1); }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+/* خلفية الصفحة: توهج ناعم بألوان الثيم */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60% 45% at 90% 0%, color-mix(in srgb, var(--slate) 24%, transparent), transparent 70%),
+    radial-gradient(50% 40% at 0% 100%, color-mix(in srgb, var(--sage) 20%, transparent), transparent 70%);
+}
+
+/* شريط تقدّم التمرير */
+#fxBar {
+  position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 300;
+  transform: scaleX(0); transform-origin: 100% 50%; pointer-events: none;
+  background: linear-gradient(90deg, var(--sage), var(--slate));
+}
+
+/* الهيدر */
+.header { backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4); }
+.nav a { position: relative; }
+.nav a::after {
+  content: ""; position: absolute; inset: auto 0 -4px 0; height: 2px; border-radius: 2px;
+  background: var(--slate); transform: scaleX(0); transition: transform .35s var(--fx-ease);
+}
+.nav a:hover::after { transform: scaleX(1); }
+
+/* الغلاف: هالة متحركة فوق الصورة */
+.hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  background: linear-gradient(100deg, rgba(10,15,20,.88), rgba(10,15,20,.3)),
+    var(--hero-img, url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1800&q=85')) center/cover;
+}
+.hero::before {
+  content: ""; position: absolute; inset: -25%; z-index: -1; pointer-events: none; opacity: .4;
+  background: conic-gradient(from 0deg at 50% 50%, var(--slate), var(--sage), transparent 55%, var(--slate));
+  filter: blur(90px); mix-blend-mode: screen; animation: fxSpin 26s linear infinite;
+}
+@keyframes fxSpin { to { transform: rotate(360deg); } }
+
+/* عناوين الأقسام */
+.section-head h2::after {
+  content: ""; display: block; width: 56px; height: 3px; margin: 12px auto 0; border-radius: 3px;
+  background: linear-gradient(90deg, var(--slate), var(--sage));
+}
+
+/* البطاقات: ضوء يتبع المؤشر + زوم ناعم للصور */
+.product, .sw-card, .category, .step, .gallery figure, .cp-card { position: relative; border-radius: 20px; }
+.product::after, .sw-card::after, .category::after, .step::after, .gallery figure::after, .cp-card::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .35s ease;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--sage) 26%, transparent), transparent 65%);
+}
+.product:hover::after, .sw-card:hover::after, .category:hover::after, .step:hover::after, .gallery figure:hover::after, .cp-card:hover::after { opacity: 1; }
+.product img, .sw-card img, .gallery img, .category img { transition: transform .7s var(--fx-ease); }
+.product:hover img, .sw-card:hover img, .gallery figure:hover img, .category:hover img { transform: scale(1.06); }
+
+/* الأزرار: لمعة عند المرور */
+.primary, .cart-btn { position: relative; overflow: hidden; }
+.primary::before, .cart-btn::before {
+  content: ""; position: absolute; top: 0; left: -130%; width: 55%; height: 100%; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
+  transform: skewX(-20deg); transition: left .7s var(--fx-ease);
+}
+.primary:hover::before, .cart-btn:hover::before { left: 150%; }
+
+/* تباين الألوان بالوضعين (النصوص فوق الخلفيات الفاتحة) */
+.secondary { color: var(--heading); }
+.close { color: var(--heading); }
+.product .sw.on { border-color: var(--heading); }
+
+/* النوافذ */
+.modal-backdrop { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.modal { border-radius: 22px; border: 1px solid var(--line); }
+.modal-backdrop.show .modal { animation: fxPop .4s var(--fx-ease); }
+@keyframes fxPop { from { opacity: 0; transform: translateY(26px) scale(.97); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero::before { animation: none; }
+  .modal-backdrop.show .modal { animation: none; }
+  .product img, .sw-card img, .gallery img, .category img { transition: none; }
+}

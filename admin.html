@@ -12,12 +12,12 @@
 <style>
   /* ألوان لوحة التحكم */
   :root {
-    --bg: #f4f6f7;
+    --bg: #f1eef8;
     --card: #ffffff;
-    --ink-black: #15191d;
-    --slate: #526b83;
-    --line: #dce2e5;
-    --muted: #737e86;
+    --ink-black: #0e0b1d;
+    --slate: #5a3b8c;
+    --line: #d9d2ec;
+    --muted: #6b6490;
     --red: #a84f55;
   }
 
@@ -397,10 +397,7 @@
     min-height: 22px;
     margin-top: 8px;
   }
-  .subtabs{display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap}
-.subtabs button{border:1px solid var(--line);background:transparent;color:inherit;padding:9px 16px;border-radius:999px;font:inherit;cursor:pointer}
-.subtabs button.active{background:var(--slate,#444);color:#fff;border-color:transparent}
-</style></head>
+  </style></head>
 <body>
   <!-- هيدر اللوحة -->
   <header>
@@ -426,7 +423,7 @@
       <h1>لوحة تحكم صاحب المحل</h1>
       <p>أضف الأقمشة والأسعار والصور، وأدرج طرق الخياطة وصور تنفيذات المحل.</p>
     </div>
-    <div class="tabs"><button class="active" onclick="tab('fabrics',this)">الأقمشة</button> <button onclick="tab('methods',this)">طرق الخياطة</button> <button onclick="tab('lists',this)">القوائم</button> <button onclick="tab('gallery',this)">صور أعمال المحل</button> <button onclick="tab('orders',this)">الطلبات</button> <button onclick="tab('settings',this)">الإعدادات</button> <button onclick="tab('design',this)">تخصيص واجهة المتجر</button> <button onclick="tab('visits',this)">الزوار</button> </div>
+    <div class="tabs"><button class="active" onclick="tab('fabrics',this)">الأقمشة</button> <button onclick="tab('methods',this)">طرق الخياطة</button> <button onclick="tab('composite',this)">البرداية المركّبة</button> <button onclick="tab('lists',this)">القوائم</button> <button onclick="tab('gallery',this)">صور أعمال المحل</button> <button onclick="tab('orders',this)">الطلبات</button> <button onclick="tab('settings',this)">الإعدادات</button> <button onclick="tab('design',this)">تخصيص واجهة المتجر</button> <button onclick="tab('visits',this)">الزوار</button> </div>
     <!-- تبويب القوائم -->
     <section id="lists" class="panel">
       <div class="card">
@@ -538,11 +535,6 @@
     </div>
     <!-- تبويب الأقمشة -->
     <section id="fabrics" class="panel active">
-      <div class="subtabs">
-        <button class="active" id="fabSubBtnMain" onclick="fabSub('main')">الأقمشة</button>
-        <button id="fabSubBtnComp" onclick="fabSub('comp')">البرداية المركّبة</button>
-      </div>
-      <div id="fabSubMain">
       <div class="card">
         <h2 id="fabricFormTitle">إضافة نوع قماش جديد</h2>
         <form id="fabricForm"><input type="hidden" id="fabricId">
@@ -551,7 +543,6 @@
             <div class="field"><label>تصنيف القماش *</label><select id="fabricCategory" required></select></div>
             <div class="field"><label>السعر بالليرة السورية *</label><input id="fabricPrice" type="number" min="0" step="1" required placeholder="السعر للمتر"></div>
             <div class="field"><label>صورة القماش (JPG أو PNG)</label><input id="fabricImage" type="file" accept="image/*"></div>
-            <div class="field full"><label>مكانه بالبرداية المركّبة (اختياري، والقماش بيضل ينباع لحاله)</label><div class="actions" style="margin:0"><label class="ro"><input type="checkbox" id="fabricMiddle"> يظهر بالنص (شيفون)</label><label class="ro"><input type="checkbox" id="fabricSides"> يظهر كجوانب</label></div></div>
             <div class="field full"><label>وصف القماش والألوان المتوفرة</label><textarea id="fabricDesc" placeholder="اكتب تفاصيل القماش والألوان والملاحظات..."></textarea></div>
           </div>
           <div class="preview" id="fabricPreview"></div>
@@ -573,29 +564,6 @@
           </div>
           <div class="actions"><button class="btn" id="colorBtn" type="submit">إضافة اللون</button><button class="btn secondary" type="button" onclick="closeColors()">إغلاق</button></div>
         </form>
-      </div>
-      <!-- تبويب فرعي: البرداية المركّبة (شيفون بالنص + قماشة جوانب) -->
-      <div id="fabSubComp" hidden>
-        <div class="card">
-          <h2>البرداية المركّبة</h2>
-          <p>شيفون بالنص وقماشة تانية على الجوانب. الزبون بيختار الشيفون من الأقمشة المعلّمة «بالنص»، والجوانب من الأقمشة المعلّمة «جوانب»، والسعر من سعر كل قماش. الحساب: (أمتار الشيفون × (سعر الشيفون + سعر البطانة)) + (أمتار الجوانب × سعر قماشة الجوانب) + (سعر الخياطة × كل الأمتار). البطانة بتنحط على الشيفون فقط.</p>
-          <div class="grid">
-            <div class="field"><label>نسبة الشيفون بالنص % (من 45 إلى 60)</label><input id="compRatio" type="number" min="45" max="60" step="0.5" value="50"></div>
-            <div class="field"><label class="ro"><input type="checkbox" id="compEnabled"> مفعّلة للزبائن (ظاهرة بالمتجر)</label></div>
-          </div>
-          <div class="actions"><button class="btn" onclick="compSaveSet()">حفظ الإعدادات</button></div>
-          <div class="hint">الجوانب = 100% ناقص نسبة الشيفون. مثلاً شيفون 50% يعني جوانب 50%.</div>
-        </div>
-        <div class="card">
-          <h2>تحديد القسم كاملاً</h2>
-          <p>علّمي كل أقمشة قسم (قائمة) دفعة وحدة: بالنص أو جوانب أو الاتنين. القماش بيضل ينباع لحاله بالمتجر بكل الحالات.</p>
-          <div id="compCatList"></div>
-        </div>
-        <div class="card">
-          <h2>تحديد كل قماش لحاله</h2>
-          <p>القماش الجديد بتحددي مكانه كمان من نموذج إضافة القماش.</p>
-          <div id="compFabList"></div>
-        </div>
       </div>
     </section>
     <!-- تبويب طرق الخياطة والبطانة والحلق -->
@@ -654,6 +622,36 @@
             <div class="field"><label>صورة اللون (اختياري)</label><input id="lcImage" type="file" accept="image/*"></div>
           </div>
           <div class="actions"><button class="btn" id="lcBtn" type="submit">إضافة اللون</button><button class="btn secondary" type="button" onclick="closeLiningColors()">إغلاق</button></div>
+        </form>
+      </div>
+    </section>
+    <!-- تبويب البرداية المركّبة: شيفون بالنص وقماشة تانية عالجوانب -->
+    <section id="composite" class="panel">
+      <div class="card">
+        <h2>البرداية المركّبة</h2>
+        <p>شيفون بالنص وقماشة تانية على الجوانب. الحساب: (أمتار الشيفون × (سعر الشيفون + سعر البطانة)) + (أمتار الجوانب × سعر قماشة الجوانب) + (سعر الخياطة × كل الأمتار). البطانة بتنحط على الشيفون فقط، وأنواعها وأسعارها من تبويب «طرق الخياطة».</p>
+        <div class="grid">
+          <div class="field"><label>نسبة الشيفون بالنص % (من 45 إلى 60)</label><input id="compRatio" type="number" min="45" max="60" step="0.5" value="50"></div>
+          <div class="field"><label>سعر متر الشيفون (ل.س)</label><input id="compChiffon" type="number" min="0" value="0"></div>
+          <div class="field"><label class="ro"><input type="checkbox" id="compEnabled"> مفعّلة للزبائن (ظاهرة بالمتجر)</label></div>
+        </div>
+        <div class="actions"><button class="btn" onclick="compSaveSet()">حفظ الإعدادات</button></div>
+        <div class="hint">الجوانب = 100% ناقص نسبة الشيفون. مثلاً شيفون 50% يعني جوانب 50%.</div>
+      </div>
+      <div class="card">
+        <h2>قماشات الجوانب</h2>
+        <p>الأنواع اللي بيقدر الزبون يختار منها لجوانب البرداية، مع سعر المتر لكل نوع.</p>
+        <div id="compSideList"></div>
+      </div>
+      <div class="card">
+        <h2>إضافة نوع للجوانب</h2>
+        <form id="compSideForm">
+          <div class="grid">
+            <div class="field"><label>الاسم</label><input id="compSideName" required maxlength="50" placeholder="مثلاً: بلاك أوت"></div>
+            <div class="field"><label>سعر المتر (ل.س)</label><input id="compSidePrice" type="number" min="0" value="0"></div>
+            <div class="field"><label>صورة (اختياري)</label><input id="compSideImage" type="file" accept="image/*"></div>
+          </div>
+          <div class="actions"><button class="btn" type="submit">إضافة نوع</button></div>
         </form>
       </div>
     </section>
@@ -738,12 +736,10 @@ async function loadFabrics() {
         return;
     }
     fabrics = data.map(r => ({
-        id: r.id, name: r.name, category: r.category, price: Number(r.price_syp), desc: r.description, image: r.image_url, mid: !!r.use_middle, sides: !!r.use_sides
+        id: r.id, name: r.name, category: r.category, price: Number(r.price_syp), desc: r.description, image: r.image_url
     }));
     fillFabricCat();
     renderFabrics();
-    if (typeof compRender === "function")
-        compRender();
     if (typeof renderCatImages === "function")
         renderCatImages();
 }
@@ -751,7 +747,7 @@ document.getElementById("fabricForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const id = document.getElementById("fabricId").value;
     const row = {
-        name: fabricName.value.trim(), category: fabricCategory.value.trim(), price_syp: Math.round(Number(fabricPrice.value)), description: fabricDesc.value.trim(), use_middle: fabricMiddle.checked, use_sides: fabricSides.checked
+        name: fabricName.value.trim(), category: fabricCategory.value.trim(), price_syp: Math.round(Number(fabricPrice.value)), description: fabricDesc.value.trim()
     };
     if (!row.name || !row.category || !(row.price_syp >= 0)) {
         alert("تأكد من الاسم والتصنيف والسعر");
@@ -796,8 +792,6 @@ function editFabric(id) {
     fabricCategory.value = f.category;
     fabricPrice.value = f.price;
     fabricDesc.value = f.desc || "";
-    fabricMiddle.checked = !!f.mid;
-    fabricSides.checked = !!f.sides;
     fabricFile = null;
     fabricPreview.innerHTML = /^https:\/\//.test(f.image || "") ? `<img src="${esc(f.image)}">` : "";
     fabricFormTitle.textContent = "تعديل بيانات القماش";
@@ -824,7 +818,7 @@ async function deleteFabric(id) {
 
 // رسم قائمة الأقمشة
 function renderFabrics() {
-    fabricList.innerHTML = fabrics.length ? fabrics.map(f => `<article class="item">${/^https:\/\//.test(f.image || "") ? `<img src="${esc(f.image)}">` : ""}<div class="body"><h3>${esc(f.name)}</h3><p>${esc(f.category)} — ${esc(f.desc || "")}</p>${f.mid || f.sides ? `<p><small>برداية مركّبة: ${[f.mid ? "بالنص" : "", f.sides ? "جوانب" : ""].filter(Boolean).join(" + ")}</small></p>` : ""}<div class="price">${f.price.toLocaleString("ar-SY")} ل.س / متر</div><div class="actions"><button class="btn" onclick="openColors('${f.id}')">الألوان</button><button class="btn secondary" onclick="editFabric('${f.id}')">تعديل</button><button class="btn danger" onclick="deleteFabric('${f.id}')">حذف</button></div></div></article>`).join("") : '<div class="empty">لم تتم إضافة أقمشة بعد.</div>';
+    fabricList.innerHTML = fabrics.length ? fabrics.map(f => `<article class="item">${/^https:\/\//.test(f.image || "") ? `<img src="${esc(f.image)}">` : ""}<div class="body"><h3>${esc(f.name)}</h3><p>${esc(f.category)} — ${esc(f.desc || "")}</p><div class="price">${f.price.toLocaleString("ar-SY")} ل.س / متر</div><div class="actions"><button class="btn" onclick="openColors('${f.id}')">الألوان</button><button class="btn secondary" onclick="editFabric('${f.id}')">تعديل</button><button class="btn danger" onclick="deleteFabric('${f.id}')">حذف</button></div></div></article>`).join("") : '<div class="empty">لم تتم إضافة أقمشة بعد.</div>';
 }
 
 // تنظيف النص من رموز HTML
@@ -1411,9 +1405,9 @@ const jparse = v => {
 // ===== تخصيص واجهة المتجر =====
 // الألوان الافتراضية (نفس يلي بصفحة المتجر)
 const THEME_DEFAULT = { dark: {
-        bg: "#f4f6f7", text: "#252b30", heading: "#15191d", accent: "#526b83", accent2: "#78958e", menuBg: "#ffffff", menuText: "#15191d", surface: "#ffffff", line: "#dce2e5", mist: "#e9eef0", dark: "#15191d", muted: "#65707a"
+        bg: "#0e0b1d", text: "#c9c2e3", heading: "#f1effa", accent: "#8b7cc7", accent2: "#5a3b8c", menuBg: "#2a1e4d", menuText: "#c9c2e3", surface: "#2a1e4d", line: "#3a3a52", mist: "#221940", dark: "#5a3b8c", muted: "#8b7cc7"
     }, light: {
-        bg: "#faf6ec", text: "#4a3b2a", heading: "#5b4630", accent: "#a8812e", accent2: "#d9bf86", menuBg: "#fffdf8", menuText: "#5b4630", surface: "#fffdf8", line: "#e7dcc3", mist: "#f3ead6", dark: "#6b5238", muted: "#7d6d56"
+        bg: "#eadcc8", text: "#0f3d3e", heading: "#0a0f14", accent: "#c6601f", accent2: "#7fb3b8", menuBg: "#f3e9d9", menuText: "#0a0f14", surface: "#f6eee1", line: "#d3c2a6", mist: "#e1d1b7", dark: "#0f3d3e", muted: "#2e6f73"
     } };
 // أسماء حقول الألوان بالعربي
 const THEME_LABELS = {
@@ -1421,11 +1415,11 @@ const THEME_LABELS = {
 };
 // القائمة الافتراضية
 const NAV_DEFAULT = [
-    { l: "الرئيسية", t: "s:home" }, { l: "الأقمشة", t: "s:fabrics" }, { l: "طرق الخياطة", t: "p:sewing" }, { l: "البرداية المركّبة", t: "p:composite" }, { l: "أعمالنا", t: "s:gallery" }, { l: "طريقة الطلب", t: "s:how" }, { l: "تواصل معنا", t: "s:contact" }
+    { l: "الرئيسية", t: "s:home" }, { l: "الأقمشة", t: "s:fabrics" }, { l: "طرق الخياطة", t: "p:sewing" }, { l: "أعمالنا", t: "s:gallery" }, { l: "طريقة الطلب", t: "s:how" }, { l: "تواصل معنا", t: "s:contact" }
 ];
 // الأهداف الممكنة لروابط القائمة
 const NAV_TARGETS = [
-    ["s:home", "الرئيسية (أعلى الصفحة)"], ["s:fabrics", "الأقمشة"], ["s:tailoring", "الخياطة والتفصيل (قسم)"], ["s:gallery", "أعمالنا"], ["s:how", "طريقة الطلب"], ["s:contact", "تواصل معنا"], ["p:sewing", "صفحة طرق الخياطة"], ["p:composite", "صفحة البرداية المركّبة"], ["u:", "رابط خارجي (https)"]
+    ["s:home", "الرئيسية (أعلى الصفحة)"], ["s:fabrics", "الأقمشة"], ["s:tailoring", "الخياطة والتفصيل (قسم)"], ["s:gallery", "أعمالنا"], ["s:how", "طريقة الطلب"], ["s:contact", "تواصل معنا"], ["p:sewing", "صفحة طرق الخياطة"], ["u:", "رابط خارجي (https)"]
 ];
 // النصوص القابلة للتعديل: [اسم المجموعة، [[المفتاح، الاسم، النص الافتراضي]]]
 const CONTENT_GROUPS = [
@@ -2314,83 +2308,111 @@ async function deleteItem(li, ii) {
 }
 
 // ===== البرداية المركّبة (شيفون بالنص + قماشة جوانب) =====
-// التبديل بين التبويبين الفرعيين جوّا قسم الأقمشة
-function fabSub(w) {
-    document.getElementById("fabSubMain").hidden = w !== "main";
-    document.getElementById("fabSubComp").hidden = w !== "comp";
-    document.getElementById("fabSubBtnMain").classList.toggle("active", w === "main");
-    document.getElementById("fabSubBtnComp").classList.toggle("active", w === "comp");
-    if (w === "comp")
-        compRender();
-}
+let compSides = [];
 
-// تحميل الإعدادات العامة (التفعيل والنسبة)
+// تحميل الإعدادات وقماشات الجوانب
 async function compLoad() {
-    const s = await sb.from("composite_settings").select("*").eq("id", 1).maybeSingle();
-    if (s.error || !s.data) {
-        compCatList.innerHTML = '<div class="empty">تعذّر تحميل البرداية المركّبة. تأكد من تشغيل ملفي composite_all.sql و composite_v2.sql بقاعدة البيانات.</div>';
+    const [s, f] = await Promise.all([sb.from("composite_settings").select("*").eq("id", 1).maybeSingle(), sb.from("composite_side_fabrics").select("*").order("created_at")]);
+    if (s.error || f.error || !s.data) {
+        compSideList.innerHTML = '<div class="empty">تعذّر تحميل البرداية المركّبة. تأكد من تشغيل ملف composite_all.sql بقاعدة البيانات.</div>';
         return;
     }
     compRatio.value = s.data.middle_ratio;
+    compChiffon.value = Number(s.data.chiffon_price_syp);
     compEnabled.checked = !!s.data.enabled;
+    compSides = f.data || [];
     compRender();
 }
 
-// أسماء الأقسام الموجودة (من قائمة أنواع الأقمشة + أي قسم عليه أقمشة)
-function compCats() {
-    return [...new Set([...(typeof fabTypeNames === "function" ? fabTypeNames() : []), ...fabrics.map(f => f.category)])].filter(Boolean);
-}
-
-// رسم جدول الأقسام وجدول الأقمشة مع خيارات بالنص / جوانب
+// رسم قماشات الجوانب
 function compRender() {
-    if (!window.compCatList)
-        return;
-    const cats = compCats();
-    compCatList.innerHTML = cats.length ? cats.map((c, i) => {
-        const fs = fabrics.filter(f => f.category === c), allM = fs.length && fs.every(f => f.mid), allS = fs.length && fs.every(f => f.sides);
-        return `<div class="method-row"><div class="field"><label>${esc(c)} <small>(${fs.length} قماش)</small></label></div><div class="actions"><label class="ro"><input type="checkbox" ${allM ? "checked" : ""} ${fs.length ? "" : "disabled"} onchange="compSetCat(${i},'use_middle',this.checked)"> بالنص</label><label class="ro"><input type="checkbox" ${allS ? "checked" : ""} ${fs.length ? "" : "disabled"} onchange="compSetCat(${i},'use_sides',this.checked)"> جوانب</label></div></div>`;
-    }).join("") : '<div class="empty">ما في أقسام بعد.</div>';
-    compFabList.innerHTML = fabrics.length ? fabrics.map(f => `<div class="method-row">${/^https:\/\//.test(f.image || "") ? `<img src="${esc(f.image)}" style="width:48px;height:48px;object-fit:cover;border-radius:8px">` : ""}<div class="field"><label>${esc(f.name)} <small>— ${esc(f.category)}</small></label></div><div class="actions"><label class="ro"><input type="checkbox" ${f.mid ? "checked" : ""} onchange="compSetFab('${f.id}','use_middle',this.checked)"> بالنص</label><label class="ro"><input type="checkbox" ${f.sides ? "checked" : ""} onchange="compSetFab('${f.id}','use_sides',this.checked)"> جوانب</label></div></div>`).join("") : '<div class="empty">ما أضفتي أقمشة بعد.</div>';
-}
-
-// تعليم قماش واحد
-async function compSetFab(id, col, v) {
-    const { error } = await sb.from("products").update({ [col]: v }).eq("id", id);
-    if (error) {
-        alert("لم يتم الحفظ: " + error.message);
-    }
-    await loadFabrics();
-}
-
-// تعليم كل أقمشة قسم دفعة وحدة
-async function compSetCat(i, col, v) {
-    const c = compCats()[i];
-    if (!c)
-        return;
-    const { error } = await sb.from("products").update({ [col]: v }).eq("category", c);
-    if (error) {
-        alert("لم يتم الحفظ: " + error.message);
-    }
-    await loadFabrics();
+    compSideList.innerHTML = compSides.length ? compSides.map((d, i) => `<div class="method-row">${/^https:\/\//.test(d.image_url || "") ? `<img src="${esc(d.image_url)}" style="width:64px;height:64px;object-fit:cover;border-radius:8px">` : ""}<div class="field"><label>الاسم</label><input id="csn${i}" value="${esc(d.name)}" maxlength="50"></div><div class="field"><label>سعر المتر (ل.س)</label><input id="csp${i}" type="number" min="0" value="${Number(d.price_syp)}"></div><div class="field"><label>تغيير الصورة</label><input id="csi${i}" type="file" accept="image/*"></div><div class="actions"><label class="ro"><input type="checkbox" id="csa${i}" ${d.active ? "checked" : ""}> ظاهر</label><button class="btn secondary" onclick="compSaveSide(${i})">حفظ</button><button class="btn danger" onclick="compDelSide(${i})">حذف</button></div></div>`).join("") : '<div class="empty">ما أضفت قماشات للجوانب بعد.</div>';
 }
 
 // حفظ الإعدادات العامة
 async function compSaveSet() {
-    const ratio = Number(compRatio.value);
+    const ratio = Number(compRatio.value), chiffon = Math.round(Number(compChiffon.value || 0));
     if (!(ratio >= 45 && ratio <= 60)) {
         alert("النسبة لازم تكون بين 45 و60");
         return;
     }
-    if (compEnabled.checked && !(fabrics.some(f => f.mid) && fabrics.some(f => f.sides))) {
-        alert("علّمي قماش واحد على الأقل «بالنص» وقماش «جوانب» قبل التفعيل");
+    if (!(chiffon >= 0)) {
+        alert("سعر الشيفون غير صحيح");
         return;
     }
-    const { error } = await sb.from("composite_settings").update({ enabled: compEnabled.checked, middle_ratio: ratio, updated_at: new Date().toISOString() }).eq("id", 1);
+    if (compEnabled.checked && !compSides.some(d => d.active)) {
+        alert("أضف قماشة جوانب وحدة ظاهرة على الأقل قبل التفعيل");
+        return;
+    }
+    const { error } = await sb.from("composite_settings").update({ enabled: compEnabled.checked, middle_ratio: ratio, chiffon_price_syp: chiffon, updated_at: new Date().toISOString() }).eq("id", 1);
     if (error) {
         alert("لم يتم الحفظ: " + error.message);
         return;
     }
     alert("تم حفظ الإعدادات.");
 }
+
+// حفظ تعديلات قماشة جوانب (واستبدال الصورة إذا اخترت وحدة)
+async function compSaveSide(i) {
+    const d = compSides[i], row = { name: document.getElementById("csn" + i).value.trim(), price_syp: Math.round(Number(document.getElementById("csp" + i).value || 0)), active: document.getElementById("csa" + i).checked };
+    if (!row.name || !(row.price_syp >= 0)) {
+        alert("تأكد من الاسم والسعر");
+        return;
+    }
+    const f = document.getElementById("csi" + i).files[0];
+    try {
+        if (f)
+            row.image_url = await uploadImage(f, "composite");
+    }
+    catch (e) {
+        alert("تعذّر رفع الصورة: " + e.message);
+        return;
+    }
+    const { error } = await sb.from("composite_side_fabrics").update(row).eq("id", d.id);
+    if (error) {
+        alert("لم يتم الحفظ: " + error.message);
+        return;
+    }
+    if (f && d.image_url)
+        await removeImage(d.image_url);
+    await compLoad();
+    alert("تم الحفظ.");
+}
+
+// حذف قماشة جوانب
+async function compDelSide(i) {
+    const d = compSides[i];
+    if (!d || !confirm("حذف «" + d.name + "»؟"))
+        return;
+    const { error } = await sb.from("composite_side_fabrics").delete().eq("id", d.id);
+    if (error) {
+        alert("لم يتم الحذف: " + error.message);
+        return;
+    }
+    if (d.image_url)
+        await removeImage(d.image_url);
+    await compLoad();
+}
+document.getElementById("compSideForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const row = { name: compSideName.value.trim(), price_syp: Math.round(Number(compSidePrice.value || 0)) };
+    const f = compSideImage.files[0];
+    try {
+        if (f)
+            row.image_url = await uploadImage(f, "composite");
+    }
+    catch (er) {
+        alert("تعذّر رفع الصورة: " + er.message);
+        return;
+    }
+    const { error } = await sb.from("composite_side_fabrics").insert(row);
+    if (error) {
+        alert("لم يتم الحفظ: " + error.message);
+        return;
+    }
+    e.target.reset();
+    compSidePrice.value = 0;
+    await compLoad();
+});
   </script>
 </body></html>
