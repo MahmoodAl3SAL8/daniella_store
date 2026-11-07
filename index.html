@@ -1207,10 +1207,8 @@ button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
 </style>
   <script>
 // ألوان الثيمين الافتراضية (dark و light). كل مفتاح لون بيتحول لمتغير CSS
-const THEME_DEFAULT = { dark: {
-        bg: "#f4f6f7", text: "#252b30", heading: "#15191d", accent: "#526b83", accent2: "#78958e", menuBg: "#ffffff", menuText: "#15191d", surface: "#ffffff", line: "#dce2e5", mist: "#e9eef0", dark: "#15191d", muted: "#65707a"
-    }, light: {
-        bg: "#faf6ec", text: "#4a3b2a", heading: "#5b4630", accent: "#a8812e", accent2: "#d9bf86", menuBg: "#fffdf8", menuText: "#5b4630", surface: "#fffdf8", line: "#e7dcc3", mist: "#f3ead6", dark: "#6b5238", muted: "#7d6d56"
+const THEME_DEFAULT = { dark: { bg: "#14171a", text: "#e6e9ec", heading: "#f5f7f8", accent: "#7fa3c4", accent2: "#8fb3aa", menuBg: "#1b1f23", menuText: "#f0f2f3", surface: "#1d2226", line: "#2c343a", mist: "#252b30", dark: "#0c0e10", muted: "#9aa5ad" }, light: {
+        bg: "#faf6ec", text: "#4a3b2a", heading: "#5b4630", accent: "#7a5a12", accent2: "#d9bf86", menuBg: "#fffdf8", menuText: "#5b4630", surface: "#fffdf8", line: "#e7dcc3", mist: "#f3ead6", dark: "#6b5238", muted: "#7d6d56"
     } };
 // ربط كل مفتاح لون بمتغير CSS يلي بيغيّره
 const THEME_VARS = {
@@ -1284,7 +1282,7 @@ function initTheme() {
         THEME_CUSTOM = JSON.parse(readLS("dn_theme_colors") || "null");
     }
     catch (e) { }
-    THEME_ADMIN_DEF = readLS("dn_theme_default") === "light" ? "light" : "dark";
+    THEME_ADMIN_DEF = readLS("dn_theme_default") !== "dark" ? "light" : "dark";
     pickTheme();
 }
 
@@ -1298,7 +1296,7 @@ function themeFromSettings(S) {
     }
     catch (e) { }
     THEME_CUSTOM = c && typeof c === "object" ? c : null;
-    THEME_ADMIN_DEF = S.theme_default === "light" ? "light" : "dark";
+    THEME_ADMIN_DEF = S.theme_default !== "dark" ? "light" : "dark";
     try {
         localStorage.setItem("dn_theme_colors", JSON.stringify(THEME_CUSTOM));
         localStorage.setItem("dn_theme_default", THEME_ADMIN_DEF);
@@ -1438,7 +1436,7 @@ function applyContent(v) {
     document.querySelectorAll("[data-c]").forEach(e => {
         const x = t[e.dataset.c];
         if (typeof x === "string" && x.trim())
-            e.textContent = x.trim().slice(0, 300);
+            e.textContent = x.replace(/[\p{Extended_Pictographic}\uFE0F\u200d]/gu, "").trim().slice(0, 300);
     });
     if (imgOk(c.hero_image))
         document.documentElement.style.setProperty("--hero-img", 'url("' + c.hero_image + '")');
@@ -1500,9 +1498,9 @@ function applyContact(S) {
         return;
     const link = waLink(S), tel = String(S.store_phone || "").replace(/[^\d+]/g, ""), b = [];
     if (link)
-        b.push(`<a class="cbtn cwa" target="_blank" rel="noopener" href="${escN(link)}">💬 تواصل عبر واتساب</a>`);
+        b.push(`<a class="cbtn cwa" target="_blank" rel="noopener" href="${escN(link)}"><i class="ic ic-chat"></i> تواصل عبر واتساب</a>`);
     if (cfg.callBtn !== false && tel.length >= 6)
-        b.push(`<a class="cbtn ccall" href="tel:${escN(tel)}">📞 اتصال مباشر</a>`);
+        b.push(`<a class="cbtn ccall" href="tel:${escN(tel)}"><i class="ic ic-phone"></i> اتصال مباشر</a>`);
     box.innerHTML = b.join("");
     if (sec && cfg.supportSection === false)
         sec.style.display = "none";
@@ -1575,12 +1573,51 @@ initTheme();
     if ("serviceWorker" in navigator && location.protocol === "https:")
       window.addEventListener("load", function () { navigator.serviceWorker.register("daniella_sw.js").catch(function () {}); });
   </script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style id="dn-polish">
+body,button,input,select,textarea{font-family:'Cairo',Tahoma,Arial,sans-serif}
+.brand small{font-family:'Cairo',Tahoma,sans-serif}
+.ic{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.2em;background:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+.ic-truck{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 6h13v10H1zM14 10h5l3 3v3h-8'/%3E%3Ccircle cx='6' cy='18' r='2'/%3E%3Ccircle cx='18' cy='18' r='2'/%3E%3C/svg%3E")}
+.ic-card{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='5' width='20' height='14' rx='2'/%3E%3Cpath d='M2 10h20'/%3E%3C/svg%3E")}
+.ic-scissors{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='6' cy='6' r='3'/%3E%3Ccircle cx='6' cy='18' r='3'/%3E%3Cpath d='M8.5 7.5L20 18M8.5 16.5L20 6'/%3E%3C/svg%3E")}
+.ic-heart{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s-8-5.4-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.6-8 11-8 11z'/%3E%3C/svg%3E")}
+.ic-sparkle{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l2.2 6.3L21 12l-6.8 2.7L12 21l-2.2-6.3L3 12l6.8-2.7z'/%3E%3C/svg%3E")}
+.ic-cart{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 4h3l2.5 11h10L21 7H7'/%3E%3Ccircle cx='10' cy='20' r='1.5'/%3E%3Ccircle cx='18' cy='20' r='1.5'/%3E%3C/svg%3E")}
+.ic-chat{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 5h16v11H9l-5 4z'/%3E%3C/svg%3E")}
+.ic-phone{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2z'/%3E%3C/svg%3E")}
+
+:root[data-theme=dark]{color-scheme:dark}
+:root[data-theme=dark] .cart-line button{color:#e8868d}
+.secondary,.close{color:var(--heading)}
+.product .sw.on{border-color:var(--heading)}
+.cp-step{color:var(--on-accent)}
+.product .sw{width:44px;height:44px}
+.close{min-width:44px;min-height:44px}
+.categories{display:flex!important;flex-wrap:wrap;justify-content:center;gap:15px}
+.category{flex:0 1 190px;min-width:140px}
+#products:empty,#sewingPreview:empty,#galleryGrid:empty,#sewingList:empty,#liningList:empty,#midGrid:empty,#sideGrid:empty{min-height:230px;border-radius:15px;background:linear-gradient(100deg,var(--mist) 30%,var(--surface) 50%,var(--mist) 70%) 0 0/200% 100%;animation:dnShim 1.3s linear infinite}
+@keyframes dnShim{to{background-position:-200% 0}}
+@keyframes dnSheet{from{transform:translateY(100%)}}
+@media(max-width:560px){
+.topbar{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.topbar::-webkit-scrollbar{display:none}
+.brand small,.lbl{display:none}
+.theme-btn{width:44px;height:44px}
+.menu-btn,.cart-btn{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.category{flex-basis:calc(50% - 8px);min-width:0}
+.modal-backdrop{align-items:flex-end;padding:0}
+.modal{max-width:none;border-radius:22px 22px 0 0;max-height:92vh;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));animation:dnSheet .3s cubic-bezier(.22,1,.36,1)}
+.modal::before{content:"";display:block;width:42px;height:4px;border-radius:4px;background:var(--line);margin:-8px auto 14px}
+}
+@media(prefers-reduced-motion:reduce){.modal{animation:none!important}#products:empty,#sewingPreview:empty,#galleryGrid:empty,#sewingList:empty,#liningList:empty,#midGrid:empty,#sideGrid:empty{animation:none}}
+</style>
 </head>
 
 <body>
   <!-- الشريط العلوي -->
-  <div class="topbar"><span id="topPhone" style="display:none"></span><span data-c="top1">🚚 التوصيل حسب
-      المنطقة</span><span data-c="top2">💳 شام كاش أو الدفع عند الاستلام</span></div>
+  <div class="topbar"><span id="topPhone" style="display:none"></span><span><i class="ic ic-truck"></i><span data-c="top1">التوصيل حسب المنطقة</span></span><span><i class="ic ic-card"></i><span data-c="top2">شام كاش أو الدفع عند الاستلام</span></span></div>
   <!-- الهيدر: الشعار والقائمة وزر السلة -->
   <header class="header">
     <a class="brand" href="#"><img id="brandLogo" alt="" style="display:none;max-height:46px"><span
@@ -1588,7 +1625,7 @@ initTheme();
     <nav class="nav"><a href="#home">الرئيسية</a><a href="#fabrics">الأقمشة</a><a href="daniella_sewing.html">طرق
         الخياطة</a><a href="#gallery">أعمالنا</a><a href="#how">طريقة الطلب</a><a href="#contact">تواصل معنا</a></nav>
     <span class="hdr-actions"><button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️ فاتح</button><button
-        class="cart-btn" onclick="openCart()">🛒 السلة (<span id="cartCount">0</span>)</button><button class="menu-btn"
+        class="cart-btn" aria-label="السلة" onclick="openCart()"><i class="ic ic-cart"></i><span class="lbl"> السلة</span> (<span id="cartCount">0</span>)</button><button class="menu-btn"
         onclick="toggleMenu()">☰</button></span>
   </header>
   <!-- محتوى الصفحة: كل قسم له data-sec عشان ينرتّب أو ينخفي من لوحة التحكم -->
@@ -1605,25 +1642,25 @@ initTheme();
       <div class="hero-copy">
         <div class="eyebrow" data-c="heroEyebrow">أناقة تليق بتفاصيل منزلك</div>
         <h1 data-c="heroTitle">دانييلا للستائر والديكور</h1>
-        <p data-c="heroText">اختاري القماش الذي تحبينه، حددي القياسات والتفصيل، واتركي الباقي علينا.</p><a
-          class="primary" data-c="heroBtn" href="#fabrics" style="display:inline-block;text-decoration:none">اكتشفي
+        <p data-c="heroText">اختر القماش الذي تحبه، حدد القياسات والتفصيل، واترك الباقي علينا.</p><a
+          class="primary" data-c="heroBtn" href="#fabrics" style="display:inline-block;text-decoration:none">اكتشف
           الأقمشة ←</a>
       </div>
     </section>
     <div class="benefits" data-sec="benefits">
-      <div class="benefit">✦ <b data-c="b1">أقمشة متنوعة</b><small data-c="s1">خيارات وألوان متعددة</small></div>
-      <div class="benefit">✂️ <b data-c="b2">تفصيل حسب الطلب</b><small data-c="s2">قياسات تناسب منزلك</small></div>
-      <div class="benefit">🚚 <b data-c="b3">توصيل</b><small data-c="s3">بحسب مناطق التغطية</small></div>
-      <div class="benefit">♡ <b data-c="b4">خدمة ومتابعة</b><small data-c="s4">نتابع طلبك خطوة بخطوة</small></div>
+      <div class="benefit"><i class="ic ic-sparkle"></i> <b data-c="b1">أقمشة متنوعة</b><small data-c="s1">خيارات وألوان متعددة</small></div>
+      <div class="benefit"><i class="ic ic-scissors"></i> <b data-c="b2">تفصيل حسب الطلب</b><small data-c="s2">قياسات تناسب منزلك</small></div>
+      <div class="benefit"><i class="ic ic-truck"></i> <b data-c="b3">توصيل</b><small data-c="s3">بحسب مناطق التغطية</small></div>
+      <div class="benefit"><i class="ic ic-heart"></i> <b data-c="b4">خدمة ومتابعة</b><small data-c="s4">نتابع طلبك خطوة بخطوة</small></div>
     </div>
     <!-- الأقمشة: بحث وتصنيفات وشبكة المنتجات -->
     <section id="fabrics" data-sec="fabrics">
       <div class="section-head">
-        <h2 data-c="fabTitle">تصفّحي أنواع الأقمشة</h2>
-        <p data-c="fabSub">اختاري النوع المناسب لغرفتك وذوقك</p>
+        <h2 data-c="fabTitle">تصفّح أنواع الأقمشة</h2>
+        <p data-c="fabSub">اختر النوع المناسب لغرفتك وذوقك</p>
       </div>
       <div class="categories" id="categories"></div>
-      <div class="toolbar"><strong>نماذج من الأقمشة</strong><input id="search" placeholder="ابحثي عن قماش..."
+      <div class="toolbar"><strong>نماذج من الأقمشة</strong><input id="search" placeholder="ابحث عن قماش..."
           oninput="renderProducts()"><select id="sort" onchange="renderProducts()">
           <option value="default">ترتيب المنتجات</option>
           <option value="low">السعر: الأقل أولاً</option>
@@ -1635,7 +1672,7 @@ initTheme();
     <section id="tailoring" data-sec="tailoring">
       <div class="section-head">
         <h2 data-c="tailTitle">طرق الخياطة لدينا</h2>
-        <p data-c="tailSub">اختاري الطريقة المناسبة عند طلب القماش. الأسعار لكل متر قماش.</p>
+        <p data-c="tailSub">اختر الطريقة المناسبة عند طلب القماش. الأسعار لكل متر قماش.</p>
       </div>
       <div class="sewing-grid" id="sewingPreview"></div>
       <p style="text-align:center;margin-top:16px"><a class="primary" href="daniella_sewing.html"
@@ -1656,20 +1693,20 @@ initTheme();
         <p data-c="howSub">من اختيار القماش حتى تأكيد الطلب</p>
       </div>
       <div class="steps">
-        <div class="step"><strong>1</strong><b>اختاري القماش</b>
-          <p>تصفحي الأنواع والألوان.</p>
+        <div class="step"><strong>1</strong><b>اختر القماش</b>
+          <p>تصفح الأنواع والألوان.</p>
         </div>
-        <div class="step"><strong>2</strong><b>أدخلي القياسات</b>
-          <p>حددي الأمتار، وإن أردتِ خياطة اختاري الطريقة والقياسات والبطانة.</p>
+        <div class="step"><strong>2</strong><b>أدخل القياسات</b>
+          <p>حدد الأمتار، وإن أردت خياطة اختر الطريقة والقياسات والبطانة.</p>
         </div>
-        <div class="step"><strong>3</strong><b>أرسلي الطلب</b>
-          <p>أضيفي عنوان التوصيل وطريقة الدفع.</p>
+        <div class="step"><strong>3</strong><b>أرسل الطلب</b>
+          <p>أضف عنوان التوصيل وطريقة الدفع.</p>
         </div>
       </div>
     </section>
     <div class="contact-strip" id="contact" data-sec="contact">
       <h2 data-c="contactTitle">دانييلا… لمسة أناقة لكل نافذة</h2>
-      <p data-c="contactText">للاستفسار عن الأقمشة والقياسات وطلبات التفصيل، تواصلي مع فريقنا.</p>
+      <p data-c="contactText">للاستفسار عن الأقمشة والقياسات وطلبات التفصيل، تواصل مع فريقنا.</p>
       <div class="contact-btns" id="contactBtns"></div>
     </div>
   </main>
@@ -1720,7 +1757,7 @@ initTheme();
     <div class="modal"><button class="close" onclick="closeModal('optModal')">×</button>
       <h2 id="optTitle"></h2>
       <div id="optBody"></div>
-      <div class="modal-actions"><button class="primary" id="optAddBtn" onclick="optAdd()">أضيفي إلى
+      <div class="modal-actions"><button class="primary" id="optAddBtn" onclick="optAdd()">أضف إلى
           السلة</button><button class="secondary" onclick="closeModal('optModal')">إلغاء</button></div>
     </div>
   </div>
@@ -1767,7 +1804,7 @@ async function loadProducts() {
         (byP[c.product_id] = byP[c.product_id] || []).push({ name: c.color_name, image: c.image_url });
     });
     if (error) {
-        box.innerHTML = '<p class="empty">تعذّر تحميل الأقمشة، حاولي لاحقاً.</p>';
+        box.innerHTML = '<p class="empty">تعذّر تحميل الأقمشة، حاول لاحقاً.</p>';
         return;
     }
     products = data.map(r => ({
@@ -1792,7 +1829,7 @@ function renderProducts() {
         list.sort((a, b) => b.price - a.price);
     document.getElementById('products').innerHTML = list.length ? list.map(p => {
         const cols = p.colors || [], ci = Math.min(sel[p.id] || 0, Math.max(cols.length - 1, 0)), cur = cols[ci], img = safeUrl((cur && cur.image) || p.img);
-        return `<article class="product">${img ? `<img src="${esc(img)}" alt="${esc(p.name)}">` : '<div class="ph"></div>'}<div class="product-info"><h3>${esc(p.name)}</h3>${cols.length ? `<div class="swatches">${cols.map((c, i) => `<button type="button" class="sw${i === ci ? ' on' : ''}" title="${esc(c.name)}" onclick="pickColor('${esc(p.id)}',${i})"><img src="${esc(safeUrl(c.image))}" alt="${esc(c.name)}"></button>`).join('')}</div><div class="cname">${esc(cur.name)}</div>` : ''}<p>${esc(p.desc)}</p><div class="price">${money(p.price)} <small style="color:var(--muted);font-weight:normal">/ متر</small></div><button class="primary" onclick="addToCart('${esc(p.id)}')">أضيفي إلى السلة</button></div></article>`;
+        return `<article class="product">${img ? `<img src="${esc(img)}" alt="${esc(p.name)}">` : '<div class="ph"></div>'}<div class="product-info"><h3>${esc(p.name)}</h3>${cols.length ? `<div class="swatches">${cols.map((c, i) => `<button type="button" class="sw${i === ci ? ' on' : ''}" title="${esc(c.name)}" onclick="pickColor('${esc(p.id)}',${i})"><img src="${esc(safeUrl(c.image))}" alt="${esc(c.name)}"></button>`).join('')}</div><div class="cname">${esc(cur.name)}</div>` : ''}<p>${esc(p.desc)}</p><div class="price">${money(p.price)} <small style="color:var(--muted);font-weight:normal">/ متر</small></div><button class="primary" onclick="addToCart('${esc(p.id)}')">أضف إلى السلة</button></div></article>`;
     }).join('') : '<p class="empty">' + (products.length ? 'لا توجد نتائج مطابقة.' : 'لا توجد أقمشة معروضة حالياً.') + '</p>';
 }
 // التصنيفات الأساسية + اسم كلاس الخلفية الخاص بكل نوع
@@ -1904,7 +1941,7 @@ function renderTailoring() {
 function updateTopbar() {
     const e = document.getElementById('topPhone');
     if (SET.store_phone) {
-        e.textContent = '☎️ ' + SET.store_phone;
+        e.innerHTML = '<i class="ic ic-phone"></i> ' + escN(SET.store_phone);
         e.style.display = '';
     }
 }
@@ -1930,7 +1967,7 @@ function openOptions(id, edit) {
     const e = optEdit >= 0 ? cart[optEdit] : null, cols = p.colors || [], c = cols[Math.min(sel[id] || 0, Math.max(cols.length - 1, 0))];
     optColor = e ? e.color : (c ? c.name : "");
     document.getElementById('optTitle').textContent = (e ? "تعديل: " : "") + p.name + (optColor ? " — " + optColor : "");
-    document.getElementById('optAddBtn').textContent = e ? "حفظ التعديل" : "أضيفي إلى السلة";
+    document.getElementById('optAddBtn').textContent = e ? "حفظ التعديل" : "أضف إلى السلة";
     document.getElementById('optBody').innerHTML = `<div class="field"><label>نوع الطلب</label><label class="ro"><input type="radio" name="oSvc" value="fabric" checked onchange="optChange()"> قماش فقط (بدون خياطة)</label><label class="ro"><input type="radio" name="oSvc" value="sewn" onchange="optChange()" ${SEW.length ? '' : 'disabled'}> قماش مع خياطة</label></div>
 <div class="field" id="oFabric"><label>عدد الأمتار *</label><input id="oM" type="number" min="0.5" step="0.5" value="1" oninput="optChange()"></div>
 <div id="oSewn" hidden><div class="field"><label>طريقة الخياطة *</label><select id="oMethod" onchange="optChange()">${SEW.map(m => `<option value="${esc(m.id)}">${esc(m.name)} (+${money(m.price)} / متر)</option>`).join('')}</select></div>
@@ -2021,7 +2058,7 @@ function optChange() {
     }
     const it = optItem(), ok = it && it.meters >= 0.5, pr = document.getElementById('oPrice');
     if (!ok) {
-        pr.innerHTML = sewn ? 'أدخلي عرض الشباك بالسنتيمتر لحساب كمية القماش.' : 'أدخلي عدد الأمتار (0.5 على الأقل).';
+        pr.innerHTML = sewn ? 'أدخل عرض الشباك بالسنتيمتر لحساب كمية القماش.' : 'أدخل عدد الأمتار (0.5 على الأقل).';
         return;
     }
     pr.innerHTML = (sewn ? 'العرض الأساسي: <b>' + (it.width / 100) + ' م</b><br>معامل الخياطة: <b>×' + it.factor + '</b><br>العرض بعد المعامل: <b>' + it.meters + ' م</b><br><b>كمية القماش النهائية: ' + it.meters + ' متر</b><hr style="border:0;border-top:1px solid var(--line)">' : '') + '<b>السعر التقريبي: ' + money(linePrice(it)) + '</b><br><small>سعر الخياطة والبطانة يُحسب لكل متر قماش.</small>';
@@ -2031,17 +2068,17 @@ function optChange() {
 function optAdd() {
     const it = optItem();
     if (!it || !(it.meters >= 0.5)) {
-        toast(it && it.with_sewing ? "أدخلي عرض الشباك بالسنتيمتر" : "أدخلي عدد الأمتار (0.5 على الأقل)");
+        toast(it && it.with_sewing ? "أدخل عرض الشباك بالسنتيمتر" : "أدخل عدد الأمتار (0.5 على الأقل)");
         return;
     }
     if (it.with_sewing) {
         if (!(it.width >= 10 && it.width <= 2000 && it.height >= 10 && it.height <= 2000)) {
-            toast("أدخلي عرض وطول الشباك بالسنتيمتر");
+            toast("أدخل عرض وطول الشباك بالسنتيمتر");
             return;
         }
         const sm = SEW.find(x => x.id === it.sewing_id);
         if (sm && sm.ring && !it.ring) {
-            toast("ألوان الحلقات غير متوفرة حالياً، تواصلي معنا");
+            toast("ألوان الحلقات غير متوفرة حالياً، تواصل معنا");
             return;
         }
     }
@@ -2083,7 +2120,7 @@ function updateCart() {
 // عرض محتويات السلة
 function openCart() {
     let box = document.getElementById('cartItems');
-    box.innerHTML = cart.length ? cart.map((x, i) => `<div class="cart-line"><span><b>${esc(x.name)}</b>${x.color ? ' — ' + esc(x.color) : ''} — ${x.meters} م<br><small>${x.with_sewing ? 'خياطة: ' + esc(x.sewing_name) + (x.ring ? ' — لون الحلقات: ' + esc(x.ring) : '') + ' (' + x.width + '×' + x.height + ' سم)' + (x.comp ? ' — شيفون بالنص ' + x.mid_meters + ' م، جوانب ' + esc(x.side_name) + (x.side_color ? ' (' + esc(x.side_color) + ')' : '') + ' ' + x.side_meters + ' م' : '') + (x.lining_name ? ' — بطانة ' + esc(x.lining_name) + (x.lining_color ? ' (' + esc(x.lining_color) + ')' : '') : ' — بدون بطانة') : 'قماش فقط بدون خياطة'}</small></span><b>${money(linePrice(x))}</b><button onclick="editItem(${i})">تعديل</button><button onclick="removeItem(${i})">حذف</button></div>`).join('') + `<p><b>المجموع التقريبي: ${money(cartTotal())}</b></p>` : '<div class="empty">السلة فارغة حالياً. اختاري بعض الأقمشة أولاً.</div>';
+    box.innerHTML = cart.length ? cart.map((x, i) => `<div class="cart-line"><span><b>${esc(x.name)}</b>${x.color ? ' — ' + esc(x.color) : ''} — ${x.meters} م<br><small>${x.with_sewing ? 'خياطة: ' + esc(x.sewing_name) + (x.ring ? ' — لون الحلقات: ' + esc(x.ring) : '') + ' (' + x.width + '×' + x.height + ' سم)' + (x.comp ? ' — شيفون بالنص ' + x.mid_meters + ' م، جوانب ' + esc(x.side_name) + (x.side_color ? ' (' + esc(x.side_color) + ')' : '') + ' ' + x.side_meters + ' م' : '') + (x.lining_name ? ' — بطانة ' + esc(x.lining_name) + (x.lining_color ? ' (' + esc(x.lining_color) + ')' : '') : ' — بدون بطانة') : 'قماش فقط بدون خياطة'}</small></span><b>${money(linePrice(x))}</b><button onclick="editItem(${i})">تعديل</button><button onclick="removeItem(${i})">حذف</button></div>`).join('') + `<p><b>المجموع التقريبي: ${money(cartTotal())}</b></p>` : '<div class="empty">السلة فارغة حالياً. اختر بعض الأقمشة أولاً.</div>';
     document.getElementById('cartModal').classList.add('show');
 }
 
@@ -2160,7 +2197,7 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
         return;
     }
     const o = data || {}, tot = o.currency === "USD" ? "$" + Number(o.total_usd).toFixed(2) : money(o.total_syp);
-    out.innerHTML = '<div class="notice"><b>تم استلام طلبك ✅</b><br>رقم الطلب: ' + esc(String(o.order_id).slice(0, 8)) + '<br>الإجمالي: ' + esc(tot) + (SET.store_phone ? '<br>للاستفسار: ' + esc(SET.store_phone) : '') + (f.payment === "شام كاش" ? '<br>' + esc(SET.shamcash_info || "سنتواصل معك لتزويدك ببيانات التحويل.") : "") + '</div>';
+    out.innerHTML = '<div class="notice"><b>تم استلام طلبك</b><br>رقم الطلب: ' + esc(String(o.order_id).slice(0, 8)) + '<br>الإجمالي: ' + esc(tot) + (SET.store_phone ? '<br>للاستفسار: ' + esc(SET.store_phone) : '') + (f.payment === "شام كاش" ? '<br>' + esc(SET.shamcash_info || "سنتواصل معك لتزويدك ببيانات التحويل.") : "") + '</div>';
     if (typeof showSuccess === "function")
         showSuccess(String(o.order_id).slice(0, 8));
     // رسالة واتساب لفريق المحل بتفاصيل الطلب ورقمه
@@ -2182,7 +2219,7 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
         if (f.notes)
             L.push("📝 ملاحظات: " + f.notes);
         const waUrl = "https://wa.me/" + waNum + "?text=" + encodeURIComponent(L.join("\n").slice(0, 1800));
-        out.innerHTML += '<div class="notice" style="text-align:center">أرسلي تفاصيل طلبك لفريقنا على واتساب ليتأكد الطلب بسرعة:<br><a class="cbtn cwa" style="display:inline-block;margin-top:8px" href="' + waUrl + '" target="_blank" rel="noopener">💬 إرسال تفاصيل الطلب عبر واتساب</a></div>';
+        out.innerHTML += '<div class="notice" style="text-align:center">أرسل تفاصيل طلبك لفريقنا على واتساب ليتأكد الطلب بسرعة:<br><a class="cbtn cwa" style="display:inline-block;margin-top:8px" href="' + waUrl + '" target="_blank" rel="noopener"><i class="ic ic-chat"></i> إرسال تفاصيل الطلب عبر واتساب</a></div>';
         try {
             window.open(waUrl, "_blank", "noopener");
         }
@@ -2439,6 +2476,17 @@ window.showSuccess = function (num) {
     });
   }).observe(document.body, { childList: true, subtree: true });
 })();
+</script>
+<script>
+(function(){var last=null;
+document.querySelectorAll('.modal').forEach(function(m){m.setAttribute('role','dialog');m.setAttribute('aria-modal','true')});
+new MutationObserver(function(ms){ms.forEach(function(m){var b=m.target;if(!b.classList||!b.classList.contains('modal-backdrop'))return;
+if(b.classList.contains('show')){last=document.activeElement;setTimeout(function(){var f=b.querySelector('input:not([type=hidden]),.cs-btn,textarea,.primary')||b.querySelector('.close');if(f)f.focus({preventScroll:true})},60)}
+else if(last&&!document.querySelector('.modal-backdrop.show')){try{last.focus({preventScroll:true})}catch(e){}last=null}})}).observe(document.body,{attributes:true,subtree:true,attributeFilter:['class']});
+document.addEventListener('keydown',function(e){var b=document.querySelector('.modal-backdrop.show');if(!b)return;
+if(e.key==='Escape'){if(document.querySelector('.cs-menu'))return;closeModal(b.id);return}
+if(e.key==='Tab'){var f=[].slice.call(b.querySelectorAll('button,a[href],input,select,textarea')).filter(function(x){return !x.disabled&&x.offsetParent!==null&&!x.classList.contains('cs-native')});if(!f.length)return;var a=f[0],z=f[f.length-1];
+if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}});})();
 </script>
 </body>
 

@@ -397,7 +397,7 @@
     min-height: 22px;
     margin-top: 8px;
   }
-  </style></head>
+  </style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet"><style>body,button,input,select,textarea{font-family:'Cairo',Tahoma,Arial,sans-serif}</style></head>
 <body>
   <!-- هيدر اللوحة -->
   <header>
@@ -488,8 +488,8 @@
       <div class="card">
         <h2>الألوان</h2>
         <p class="status">غيّر ألوان كل وضع، ثم عاين، ثم احفظ وانشر. الزبون يبدّل بين الوضعين بالزر الذي بجانب السلة.</p>
-        <div class="field"><label>الوضع الافتراضي للزبائن</label><select id="themeDefSel"><option value="dark">داكن (الألوان الحالية)</option><option value="light">فاتح (ذهبي وبيج وعاجي)</option></select></div>
-        <h3>الوضع الداكن (الألوان الحالية)</h3>
+        <div class="field"><label>الوضع الافتراضي للزبائن</label><select id="themeDefSel"><option value="dark">داكن </option><option value="light">فاتح (ذهبي وبيج وعاجي)</option></select></div>
+        <h3>الوضع الداكن </h3>
         <div class="grid" id="theme_dark"></div>
         <h3>الوضع الفاتح (ذهبي وبيج وعاجي وبني فاتح)</h3>
         <div class="grid" id="theme_light"></div>
@@ -690,6 +690,8 @@
 
 <script>
 // ===== سكربت لوحة التحكم =====
+window.alert=function(m){var t=document.getElementById('adToast');if(!t){t=document.createElement('div');t.id='adToast';t.setAttribute('role','status');t.style.cssText='position:fixed;bottom:20px;right:20px;left:20px;max-width:420px;margin:auto;z-index:300;background:#15191d;color:#fff;padding:13px 18px;border-radius:12px;box-shadow:0 10px 30px #0006;transition:opacity .25s';document.body.appendChild(t)}t.textContent=String(m);t.style.display='block';t.style.opacity=1;clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity=0;setTimeout(function(){t.style.display='none'},250)},3500)};
+
 // قراءة آمنة من localStorage مع قيمة افتراضية
 const read = (k, d) => {
     try {
@@ -1415,10 +1417,8 @@ const jparse = v => {
 };
 // ===== تخصيص واجهة المتجر =====
 // الألوان الافتراضية (نفس يلي بصفحة المتجر)
-const THEME_DEFAULT = { dark: {
-        bg: "#f4f6f7", text: "#252b30", heading: "#15191d", accent: "#526b83", accent2: "#78958e", menuBg: "#ffffff", menuText: "#15191d", surface: "#ffffff", line: "#dce2e5", mist: "#e9eef0", dark: "#15191d", muted: "#65707a"
-    }, light: {
-        bg: "#faf6ec", text: "#4a3b2a", heading: "#5b4630", accent: "#a8812e", accent2: "#d9bf86", menuBg: "#fffdf8", menuText: "#5b4630", surface: "#fffdf8", line: "#e7dcc3", mist: "#f3ead6", dark: "#6b5238", muted: "#7d6d56"
+const THEME_DEFAULT = { dark: { bg: "#14171a", text: "#e6e9ec", heading: "#f5f7f8", accent: "#7fa3c4", accent2: "#8fb3aa", menuBg: "#1b1f23", menuText: "#f0f2f3", surface: "#1d2226", line: "#2c343a", mist: "#252b30", dark: "#0c0e10", muted: "#9aa5ad" }, light: {
+        bg: "#faf6ec", text: "#4a3b2a", heading: "#5b4630", accent: "#7a5a12", accent2: "#d9bf86", menuBg: "#fffdf8", menuText: "#5b4630", surface: "#fffdf8", line: "#e7dcc3", mist: "#f3ead6", dark: "#6b5238", muted: "#7d6d56"
     } };
 // أسماء حقول الألوان بالعربي
 const THEME_LABELS = {
@@ -1437,16 +1437,16 @@ const CONTENT_GROUPS = [
     ["الشريط العلوي", [["top1", "الشريط العلوي (1)", "🚚 التوصيل حسب المنطقة"], ["top2", "الشريط العلوي (2)", "💳 شام كاش أو الدفع عند الاستلام"]]],
     ["الهوية", [["brand", "اسم المتجر", "DANIELLA"], ["brandSub", "الوصف تحت الاسم", "دانييلا للستائر والديكور"]]],
     ["غلاف الصفحة", [
-            ["heroEyebrow", "سطر صغير", "أناقة تليق بتفاصيل منزلك"], ["heroTitle", "العنوان", "دانييلا للستائر والديكور"], ["heroText", "النص", "اختاري القماش الذي تحبينه، حددي القياسات والتفصيل، واتركي الباقي علينا."], ["heroBtn", "نص الزر", "اكتشفي الأقمشة ←"]
+            ["heroEyebrow", "سطر صغير", "أناقة تليق بتفاصيل منزلك"], ["heroTitle", "العنوان", "دانييلا للستائر والديكور"], ["heroText", "النص", "اختر القماش الذي تحبه، حدد القياسات والتفصيل، واترك الباقي علينا."], ["heroBtn", "نص الزر", "اكتشف الأقمشة ←"]
         ]],
     ["شريط المميزات", [
             ["b1", "ميزة 1: العنوان", "أقمشة متنوعة"], ["s1", "ميزة 1: النص", "خيارات وألوان متعددة"], ["b2", "ميزة 2: العنوان", "تفصيل حسب الطلب"], ["s2", "ميزة 2: النص", "قياسات تناسب منزلك"], ["b3", "ميزة 3: العنوان", "توصيل"], ["s3", "ميزة 3: النص", "بحسب مناطق التغطية"], ["b4", "ميزة 4: العنوان", "خدمة ومتابعة"], ["s4", "ميزة 4: النص", "نتابع طلبك خطوة بخطوة"]
         ]],
     ["عناوين الأقسام", [
-            ["fabTitle", "الأقمشة: العنوان", "تصفّحي أنواع الأقمشة"], ["fabSub", "الأقمشة: النص", "اختاري النوع المناسب لغرفتك وذوقك"], ["tailTitle", "الخياطة: العنوان", "طرق الخياطة لدينا"], ["tailSub", "الخياطة: النص", "اختاري الطريقة المناسبة عند طلب القماش. الأسعار لكل متر قماش."], ["galTitle", "الأعمال: العنوان", "أعمالنا"], ["galSub", "الأعمال: النص", "نماذج من أعمال محل دانييلا"], ["howTitle", "طريقة الطلب: العنوان", "طريقة الطلب سهلة وبسيطة"], ["howSub", "طريقة الطلب: النص", "من اختيار القماش حتى تأكيد الطلب"]
+            ["fabTitle", "الأقمشة: العنوان", "تصفّح أنواع الأقمشة"], ["fabSub", "الأقمشة: النص", "اختر النوع المناسب لغرفتك وذوقك"], ["tailTitle", "الخياطة: العنوان", "طرق الخياطة لدينا"], ["tailSub", "الخياطة: النص", "اختر الطريقة المناسبة عند طلب القماش. الأسعار لكل متر قماش."], ["galTitle", "الأعمال: العنوان", "أعمالنا"], ["galSub", "الأعمال: النص", "نماذج من أعمال محل دانييلا"], ["howTitle", "طريقة الطلب: العنوان", "طريقة الطلب سهلة وبسيطة"], ["howSub", "طريقة الطلب: النص", "من اختيار القماش حتى تأكيد الطلب"]
         ]],
     ["التواصل والتذييل", [
-            ["contactTitle", "التواصل: العنوان", "دانييلا… لمسة أناقة لكل نافذة"], ["contactText", "التواصل: النص", "للاستفسار عن الأقمشة والقياسات وطلبات التفصيل، تواصلي مع فريقنا."], ["footer", "التذييل", "DANIELLA — دانييلا للستائر والديكور. جميع الحقوق محفوظة."]
+            ["contactTitle", "التواصل: العنوان", "دانييلا… لمسة أناقة لكل نافذة"], ["contactText", "التواصل: النص", "للاستفسار عن الأقمشة والقياسات وطلبات التفصيل، تواصل مع فريقنا."], ["footer", "التذييل", "DANIELLA — دانييلا للستائر والديكور. جميع الحقوق محفوظة."]
         ]]
 ];
 // أسماء أقسام الصفحة الرئيسية
@@ -1479,7 +1479,7 @@ function markDirty() {
 function loadDesign(m) {
     lastSettings = Object.assign({}, m);
     themeSaved = jparse(m.theme_colors) || {};
-    themeDefSel.value = m.theme_default === "light" ? "light" : "dark";
+    themeDefSel.value = m.theme_default !== "dark" ? "light" : "dark";
     renderThemeEditor();
     const n = jparse(m.nav_menu);
     navItems = Array.isArray(n) && n.length ? n.filter(x => x && typeof x.l === "string" && typeof x.t === "string").map(x => ({

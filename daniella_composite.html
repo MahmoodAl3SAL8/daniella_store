@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>البرداية المركّبة: شيفون بالنص وقماشة على الجوانب | دانييلا — دمشق القديمة</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<meta name="description" content="صمّمي برداية مركّبة عند دانييلا: شيفون بالنص وقماشة جلد غزال أو بلاك أوت أو مخمل على الجوانب، حسب مقاس شباكك.">
+<meta name="description" content="صمّم برداية مركّبة عند دانييلا: شيفون بالنص وقماشة جلد غزال أو بلاك أوت أو مخمل على الجوانب، حسب مقاس شباكك.">
 <link rel="canonical" href="https://daniella-curtains.mahmoodalsalee.workers.dev/daniella_composite.html">
 <style>
   /* متغيرات الألوان الأساسية. الجافاسكربت بيغيّرها لما الثيم يتبدّل */
@@ -1091,10 +1091,8 @@ button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
 </style>
 <script>
 // ألوان الثيمين الافتراضية (dark و light). كل مفتاح لون بيتحول لمتغير CSS
-const THEME_DEFAULT = { dark: {
-        bg: "#f4f6f7", text: "#252b30", heading: "#15191d", accent: "#526b83", accent2: "#78958e", menuBg: "#ffffff", menuText: "#15191d", surface: "#ffffff", line: "#dce2e5", mist: "#e9eef0", dark: "#15191d", muted: "#65707a"
-    }, light: {
-        bg: "#faf6ec", text: "#4a3b2a", heading: "#5b4630", accent: "#a8812e", accent2: "#d9bf86", menuBg: "#fffdf8", menuText: "#5b4630", surface: "#fffdf8", line: "#e7dcc3", mist: "#f3ead6", dark: "#6b5238", muted: "#7d6d56"
+const THEME_DEFAULT = { dark: { bg: "#14171a", text: "#e6e9ec", heading: "#f5f7f8", accent: "#7fa3c4", accent2: "#8fb3aa", menuBg: "#1b1f23", menuText: "#f0f2f3", surface: "#1d2226", line: "#2c343a", mist: "#252b30", dark: "#0c0e10", muted: "#9aa5ad" }, light: {
+        bg: "#faf6ec", text: "#4a3b2a", heading: "#5b4630", accent: "#7a5a12", accent2: "#d9bf86", menuBg: "#fffdf8", menuText: "#5b4630", surface: "#fffdf8", line: "#e7dcc3", mist: "#f3ead6", dark: "#6b5238", muted: "#7d6d56"
     } };
 // ربط كل مفتاح لون بمتغير CSS يلي بيغيّره
 const THEME_VARS = {
@@ -1168,7 +1166,7 @@ function initTheme() {
         THEME_CUSTOM = JSON.parse(readLS("dn_theme_colors") || "null");
     }
     catch (e) { }
-    THEME_ADMIN_DEF = readLS("dn_theme_default") === "light" ? "light" : "dark";
+    THEME_ADMIN_DEF = readLS("dn_theme_default") !== "dark" ? "light" : "dark";
     pickTheme();
 }
 
@@ -1182,7 +1180,7 @@ function themeFromSettings(S) {
     }
     catch (e) { }
     THEME_CUSTOM = c && typeof c === "object" ? c : null;
-    THEME_ADMIN_DEF = S.theme_default === "light" ? "light" : "dark";
+    THEME_ADMIN_DEF = S.theme_default !== "dark" ? "light" : "dark";
     try {
         localStorage.setItem("dn_theme_colors", JSON.stringify(THEME_CUSTOM));
         localStorage.setItem("dn_theme_default", THEME_ADMIN_DEF);
@@ -1322,7 +1320,7 @@ function applyContent(v) {
     document.querySelectorAll("[data-c]").forEach(e => {
         const x = t[e.dataset.c];
         if (typeof x === "string" && x.trim())
-            e.textContent = x.trim().slice(0, 300);
+            e.textContent = x.replace(/[\p{Extended_Pictographic}\uFE0F\u200d]/gu, "").trim().slice(0, 300);
     });
     if (imgOk(c.hero_image))
         document.documentElement.style.setProperty("--hero-img", 'url("' + c.hero_image + '")');
@@ -1384,9 +1382,9 @@ function applyContact(S) {
         return;
     const link = waLink(S), tel = String(S.store_phone || "").replace(/[^\d+]/g, ""), b = [];
     if (link)
-        b.push(`<a class="cbtn cwa" target="_blank" rel="noopener" href="${escN(link)}">💬 تواصل عبر واتساب</a>`);
+        b.push(`<a class="cbtn cwa" target="_blank" rel="noopener" href="${escN(link)}"><i class="ic ic-chat"></i> تواصل عبر واتساب</a>`);
     if (cfg.callBtn !== false && tel.length >= 6)
-        b.push(`<a class="cbtn ccall" href="tel:${escN(tel)}">📞 اتصال مباشر</a>`);
+        b.push(`<a class="cbtn ccall" href="tel:${escN(tel)}"><i class="ic ic-phone"></i> اتصال مباشر</a>`);
     box.innerHTML = b.join("");
     if (sec && cfg.supportSection === false)
         sec.style.display = "none";
@@ -1459,14 +1457,54 @@ initTheme();
     if ("serviceWorker" in navigator && location.protocol === "https:")
       window.addEventListener("load", function () { navigator.serviceWorker.register("daniella_sw.js").catch(function () {}); });
   </script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style id="dn-polish">
+body,button,input,select,textarea{font-family:'Cairo',Tahoma,Arial,sans-serif}
+.brand small{font-family:'Cairo',Tahoma,sans-serif}
+.ic{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.2em;background:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+.ic-truck{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 6h13v10H1zM14 10h5l3 3v3h-8'/%3E%3Ccircle cx='6' cy='18' r='2'/%3E%3Ccircle cx='18' cy='18' r='2'/%3E%3C/svg%3E")}
+.ic-card{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='5' width='20' height='14' rx='2'/%3E%3Cpath d='M2 10h20'/%3E%3C/svg%3E")}
+.ic-scissors{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='6' cy='6' r='3'/%3E%3Ccircle cx='6' cy='18' r='3'/%3E%3Cpath d='M8.5 7.5L20 18M8.5 16.5L20 6'/%3E%3C/svg%3E")}
+.ic-heart{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s-8-5.4-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.6-8 11-8 11z'/%3E%3C/svg%3E")}
+.ic-sparkle{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l2.2 6.3L21 12l-6.8 2.7L12 21l-2.2-6.3L3 12l6.8-2.7z'/%3E%3C/svg%3E")}
+.ic-cart{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 4h3l2.5 11h10L21 7H7'/%3E%3Ccircle cx='10' cy='20' r='1.5'/%3E%3Ccircle cx='18' cy='20' r='1.5'/%3E%3C/svg%3E")}
+.ic-chat{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 5h16v11H9l-5 4z'/%3E%3C/svg%3E")}
+.ic-phone{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2z'/%3E%3C/svg%3E")}
+
+:root[data-theme=dark]{color-scheme:dark}
+:root[data-theme=dark] .cart-line button{color:#e8868d}
+.secondary,.close{color:var(--heading)}
+.product .sw.on{border-color:var(--heading)}
+.cp-step{color:var(--on-accent)}
+.product .sw{width:44px;height:44px}
+.close{min-width:44px;min-height:44px}
+.categories{display:flex!important;flex-wrap:wrap;justify-content:center;gap:15px}
+.category{flex:0 1 190px;min-width:140px}
+#products:empty,#sewingPreview:empty,#galleryGrid:empty,#sewingList:empty,#liningList:empty,#midGrid:empty,#sideGrid:empty{min-height:230px;border-radius:15px;background:linear-gradient(100deg,var(--mist) 30%,var(--surface) 50%,var(--mist) 70%) 0 0/200% 100%;animation:dnShim 1.3s linear infinite}
+@keyframes dnShim{to{background-position:-200% 0}}
+@keyframes dnSheet{from{transform:translateY(100%)}}
+@media(max-width:560px){
+.topbar{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.topbar::-webkit-scrollbar{display:none}
+.brand small,.lbl{display:none}
+.theme-btn{width:44px;height:44px}
+.menu-btn,.cart-btn{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.category{flex-basis:calc(50% - 8px);min-width:0}
+.modal-backdrop{align-items:flex-end;padding:0}
+.modal{max-width:none;border-radius:22px 22px 0 0;max-height:92vh;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));animation:dnSheet .3s cubic-bezier(.22,1,.36,1)}
+.modal::before{content:"";display:block;width:42px;height:4px;border-radius:4px;background:var(--line);margin:-8px auto 14px}
+}
+@media(prefers-reduced-motion:reduce){.modal{animation:none!important}#products:empty,#sewingPreview:empty,#galleryGrid:empty,#sewingList:empty,#liningList:empty,#midGrid:empty,#sideGrid:empty{animation:none}}
+</style>
 </head>
 <body>
   <!-- الشريط العلوي -->
-  <div class="topbar"><span id="topPhone" style="display:none"></span><span data-c="top1">🚚 التوصيل حسب المنطقة</span><span data-c="top2">💳 شام كاش أو الدفع عند الاستلام</span></div>
+  <div class="topbar"><span id="topPhone" style="display:none"></span><span><i class="ic ic-truck"></i><span data-c="top1">التوصيل حسب المنطقة</span></span><span><i class="ic ic-card"></i><span data-c="top2">شام كاش أو الدفع عند الاستلام</span></span></div>
   <!-- الهيدر -->
   <header class="header"><a class="brand" href="index.html"><img id="brandLogo" alt="" style="display:none;max-height:46px"><span data-c="brand">DANIELLA</span><small data-c="brandSub">دانييلا للستائر والديكور</small></a>
     <nav class="nav"></nav>
-    <span class="hdr-actions"><button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️ فاتح</button><a class="cart-btn" href="index.html#fabrics" style="text-decoration:none">🛒 اطلبي الآن</a><button class="menu-btn" onclick="toggleMenu()">☰</button></span>
+    <span class="hdr-actions"><button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️ فاتح</button><a class="cart-btn" href="index.html#fabrics" style="text-decoration:none" aria-label="اطلب الآن"><i class="ic ic-cart"></i><span class="lbl"> اطلب الآن</span></a><button class="menu-btn" onclick="toggleMenu()">☰</button></span>
   </header>
   <!-- الأقسام: طرق الخياطة، ألوان الحلق، البطانة (بتتعبّى من الجافاسكربت) -->
   <main>
@@ -1476,16 +1514,16 @@ initTheme();
         <p id="compIntro">شيفون بالنص وقماشة تانية على الجوانب، على مقاس شباكك.</p>
       </div>
       <div class="notice" id="compLoading">جاري التحميل...</div>
-      <div class="notice" id="compOff" hidden>البرداية المركّبة غير متوفرة حالياً. <a href="index.html#fabrics">تصفّحي الأقمشة ←</a></div>
+      <div class="notice" id="compOff" hidden>البرداية المركّبة غير متوفرة حالياً. <a href="index.html#fabrics">تصفّح الأقمشة ←</a></div>
     </section>
     <div id="compApp" hidden>
       <section>
-        <div class="section-head"><h2><span class="cp-step">1</span>اختاري الشيفون</h2><p>بيكون بنص الستارة.</p></div>
+        <div class="section-head"><h2><span class="cp-step">1</span>اختر الشيفون</h2><p>بيكون بنص الستارة.</p></div>
         <div class="cp-grid" id="midGrid"></div>
         <div class="cp-colors" id="midColors"></div>
       </section>
       <section>
-        <div class="section-head"><h2><span class="cp-step">2</span>اختاري الجوانب</h2><p>بتكون على جانبي الستارة.</p></div>
+        <div class="section-head"><h2><span class="cp-step">2</span>اختر الجوانب</h2><p>بتكون على جانبي الستارة.</p></div>
         <div class="cp-grid" id="sideGrid"></div>
         <div class="cp-colors" id="sideColors"></div>
       </section>
@@ -1497,8 +1535,8 @@ initTheme();
         <div class="field" id="cRingBox" hidden><label>لون الحلقات *</label><div class="ringopts" id="cRings"></div></div>
         <div class="field"><label>بطانة الشيفون (النص فقط)</label><select id="cLin" onchange="linChange()"><option value="">بدون بطانة</option></select></div>
         <div class="field" id="cLinColorBox" hidden><label>لون البطانة *</label><select id="cLinColor" onchange="calc()"></select></div>
-        <div class="cp-sum notice" id="cSum">اختاري الشيفون والجوانب وأدخلي القياسات.</div>
-        <p style="text-align:center"><button class="primary" id="cAdd" onclick="addToCart()" style="border:0;cursor:pointer">أضيفي إلى السلة</button></p>
+        <div class="cp-sum notice" id="cSum">اختر الشيفون والجوانب وأدخل القياسات.</div>
+        <p style="text-align:center"><button class="primary" id="cAdd" onclick="addToCart()" style="border:0;cursor:pointer">أضف إلى السلة</button></p>
       </section>
     </div>
   </main>
@@ -1551,7 +1589,7 @@ async function load() {
         liveApply(S);
         if (S.store_phone) {
             const e = $('topPhone');
-            e.textContent = '☎️ ' + S.store_phone;
+            e.innerHTML = '<i class="ic ic-phone"></i> ' + escN(S.store_phone);
             e.style.display = '';
         }
         const byP = {};
@@ -1705,7 +1743,7 @@ function calc() {
     }
     const it = build(), box = $('cSum');
     if (!it || !it.width || it.meters < 0.5) {
-        box.textContent = !it ? 'اختاري الشيفون والجوانب أولاً.' : 'أدخلي عرض الشباك بالسنتيمتر لحساب الكمية والسعر.';
+        box.textContent = !it ? 'اختر الشيفون والجوانب أولاً.' : 'أدخل عرض الشباك بالسنتيمتر لحساب الكمية والسعر.';
         return;
     }
     box.innerHTML = 'الكمية بعد معامل الخياطة: <b>' + it.meters + ' م</b><br>الشيفون (' + esc(it.chiffon_name) + (it.chiffon_color ? ' — ' + esc(it.chiffon_color) : '') + '): <b>' + it.mid_meters + ' م</b><br>الجوانب (' + esc(it.side_name) + (it.side_color ? ' — ' + esc(it.side_color) : '') + '): <b>' + it.side_meters + ' م</b><br><b>السعر التقريبي: ' + money(total(it)) + '</b>';
@@ -1715,21 +1753,21 @@ function calc() {
 function addToCart() {
     const it = build();
     if (!it) {
-        alert("اختاري الشيفون وقماشة الجوانب أولاً");
+        alert("اختر الشيفون وقماشة الجوانب أولاً");
         return;
     }
     const mf = MIDS.find(x => x.id === pickMid), sf = SIDES.find(x => x.id === pickSide);
     if (mf.colors.length && !pickMidColor || sf.colors.length && !pickSideColor) {
-        alert("اختاري لون الشيفون ولون الجوانب");
+        alert("اختر لون الشيفون ولون الجوانب");
         return;
     }
     if (!(it.meters >= 0.5) || !(it.width >= 10 && it.width <= 2000 && it.height >= 10 && it.height <= 2000)) {
-        alert("أدخلي عرض وطول الشباك بالسنتيمتر");
+        alert("أدخل عرض وطول الشباك بالسنتيمتر");
         return;
     }
     const sm = SEW.find(x => x.id === it.sewing_id);
     if (sm && sm.ring && !it.ring) {
-        alert("ألوان الحلقات غير متوفرة حالياً، تواصلي معنا");
+        alert("ألوان الحلقات غير متوفرة حالياً، تواصل معنا");
         return;
     }
     const c = readCart();
@@ -1741,7 +1779,7 @@ function addToCart() {
         sessionStorage.setItem('dn_cart', JSON.stringify(c));
     }
     catch (e) {
-        alert("تعذّر حفظ السلة، فعّلي التخزين بالمتصفح");
+        alert("تعذّر حفظ السلة، فعّل التخزين بالمتصفح");
         return;
     }
     location.href = "index.html#cart";
