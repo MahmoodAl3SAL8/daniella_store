@@ -12,12 +12,12 @@
 <style>
   /* ألوان لوحة التحكم */
   :root {
-    --bg: #f1eef8;
+    --bg: #f4f6f7;
     --card: #ffffff;
-    --ink-black: #0e0b1d;
-    --slate: #5a3b8c;
-    --line: #d9d2ec;
-    --muted: #6b6490;
+    --ink-black: #15191d;
+    --slate: #526b83;
+    --line: #dce2e5;
+    --muted: #737e86;
     --red: #a84f55;
   }
 
@@ -423,7 +423,7 @@
       <h1>لوحة تحكم صاحب المحل</h1>
       <p>أضف الأقمشة والأسعار والصور، وأدرج طرق الخياطة وصور تنفيذات المحل.</p>
     </div>
-    <div class="tabs"><button class="active" onclick="tab('fabrics',this)">الأقمشة</button> <button onclick="tab('methods',this)">طرق الخياطة</button> <button onclick="tab('composite',this)">البرداية المركّبة</button> <button onclick="tab('lists',this)">القوائم</button> <button onclick="tab('gallery',this)">صور أعمال المحل</button> <button onclick="tab('orders',this)">الطلبات</button> <button onclick="tab('settings',this)">الإعدادات</button> <button onclick="tab('design',this)">تخصيص واجهة المتجر</button> <button onclick="tab('visits',this)">الزوار</button> </div>
+    <div class="tabs"><button onclick="tab('slidesTab',this)">الشاشة المتحركة</button> <button class="active" onclick="tab('fabrics',this)">الأقمشة</button> <button onclick="tab('methods',this)">طرق الخياطة</button> <button onclick="tab('composite',this)">البرداية المركّبة</button> <button onclick="tab('lists',this)">القوائم</button> <button onclick="tab('gallery',this)">صور أعمال المحل</button> <button onclick="tab('orders',this)">الطلبات</button> <button onclick="tab('settings',this)">الإعدادات</button> <button onclick="tab('design',this)">تخصيص واجهة المتجر</button> <button onclick="tab('visits',this)">الزوار</button> </div>
     <!-- تبويب القوائم -->
     <section id="lists" class="panel">
       <div class="card">
@@ -435,6 +435,16 @@
         </form>
       </div>
       <div id="listsBox"></div>
+    </section>
+    <!-- تبويب الشاشة المتحركة -->
+    <section id="slidesTab" class="panel">
+      <div class="card">
+        <h2>الشاشة المتحركة (السلايدر)</h2>
+        <p class="status">أول شي بيظهر بالمتجر. أضف شرائح (صورة + عنوان + نص + زر اختياري) وبتتبدّل لحالها. إذا ما أضفت شرائح بيظهر الغلاف العادي. بتقدر ترتّبها أو تخفيها من «تخصيص واجهة المتجر ← ترتيب الأقسام».</p>
+        <div class="field" style="max-width:260px"><label>مدة بقاء كل شريحة (ثواني)</label><input id="slSecs" type="number" min="2" max="30" value="5"></div>
+        <div id="slideList"></div>
+        <div class="actions"><button class="btn secondary" onclick="slAdd()">+ إضافة شريحة</button><button class="btn" onclick="slSave()">💾 حفظ ونشر</button></div>
+      </div>
     </section>
     <!-- تبويب الطلبات -->
     <section id="orders" class="panel">
@@ -818,7 +828,7 @@ async function deleteFabric(id) {
 
 // رسم قائمة الأقمشة
 function renderFabrics() {
-    fabricList.innerHTML = fabrics.length ? fabrics.map(f => `<article class="item">${/^https:\/\//.test(f.image || "") ? `<img src="${esc(f.image)}">` : ""}<div class="body"><h3>${esc(f.name)}</h3><p>${esc(f.category)} — ${esc(f.desc || "")}</p><div class="price">${f.price.toLocaleString("ar-SY")} ل.س / متر</div><div class="actions"><button class="btn" onclick="openColors('${f.id}')">الألوان</button><button class="btn secondary" onclick="editFabric('${f.id}')">تعديل</button><button class="btn danger" onclick="deleteFabric('${f.id}')">حذف</button></div></div></article>`).join("") : '<div class="empty">لم تتم إضافة أقمشة بعد.</div>';
+    fabricList.innerHTML = fabrics.length ? fabrics.map(f => `<article class="item">${/^https:\/\//.test(f.image || "") ? `<img src="${esc(f.image)}">` : ""}<div class="body"><h3>${esc(f.name)}</h3><p>${esc(f.category)} — ${esc(f.desc || "")}</p><div class="price">${f.price.toLocaleString("en-US")} ل.س / متر</div><div class="actions"><button class="btn" onclick="openColors('${f.id}')">الألوان</button><button class="btn secondary" onclick="editFabric('${f.id}')">تعديل</button><button class="btn danger" onclick="deleteFabric('${f.id}')">حذف</button></div></div></article>`).join("") : '<div class="empty">لم تتم إضافة أقمشة بعد.</div>';
 }
 
 // تنظيف النص من رموز HTML
@@ -1263,7 +1273,7 @@ async function deleteLiningColor(id) {
 // حالات الطلب بالترتيب
 const STATUSES = ["جديد", "قيد المراجعة", "قيد التجهيز", "جاهز", "تم التوصيل", "ملغي"];
 // تنسيق المبلغ بالليرة السورية
-const fmtSyp = n => Number(n).toLocaleString("ar-SY") + " ل.س";
+const fmtSyp = n => Number(n).toLocaleString("en-US") + " ل.س";
 
 // تحميل الطلبات
 async function loadOrders() {
@@ -1276,7 +1286,7 @@ async function loadOrders() {
     orderList.innerHTML = data.length ? data.map(o => {
         const items = (o.order_items || []).map(i => `<li><b>${esc(i.product_name)}</b>${i.color_name ? " — " + esc(i.color_name) : ""} — ${Number(i.quantity)} م${i.is_composite ? `<br>برداية مركّبة: شيفون ${Number(i.middle_meters)} م + جوانب ${esc(i.side_fabric_name)} ${Number(i.side_meters)} م` : ""}${i.with_sewing ? `<br>خياطة: ${esc(i.sewing_method)}${i.ring_color ? " — لون الحلقات: " + esc(i.ring_color) : ""} (${Number(i.width_cm)}×${Number(i.height_cm)} سم)${i.lining_type ? `<br>بطانة: ${esc(i.lining_type)}${i.lining_color ? " — " + esc(i.lining_color) : ""}` : "<br>بدون بطانة"}` : "<br>قماش فقط بدون خياطة"}<br><small>${fmtSyp(i.line_total_syp)}</small></li>`).join("");
         const total = o.currency === "USD" ? `$${Number(o.total_usd).toFixed(2)} (≈ ${fmtSyp(o.total_syp)})` : fmtSyp(o.total_syp);
-        return `<div class="card" style="margin-top:12px"><b>طلب #${esc(String(o.id).slice(0, 8))}</b> — ${esc(new Date(o.created_at).toLocaleString("ar-SY"))}<br>${esc(o.customer_name)} — <a href="tel:${esc(o.phone)}">${esc(o.phone)}</a><br>${esc(o.city)} — ${esc(o.address)}<br>الدفع: ${esc(o.payment_method)} — ${o.currency === "USD" ? "بالدولار" : "بالليرة السورية"}<br><b>الإجمالي: ${total}</b>${o.notes ? `<br>ملاحظات: ${esc(o.notes)}` : ""}<ul>${items}</ul><div class="field"><label>حالة الطلب</label><select onchange="updateStatus('${o.id}',this.value)">${STATUSES.map(s => `<option${s === o.status ? " selected" : ""}>${esc(s)}</option>`).join("")}</select></div></div>`;
+        return `<div class="card" style="margin-top:12px"><b>طلب #${esc(String(o.id).slice(0, 8))}</b> — ${esc(new Date(o.created_at).toLocaleString("en-US"))}<br>${esc(o.customer_name)} — <a href="tel:${esc(o.phone)}">${esc(o.phone)}</a><br>${esc(o.city)} — ${esc(o.address)}<br>الدفع: ${esc(o.payment_method)} — ${o.currency === "USD" ? "بالدولار" : "بالليرة السورية"}<br><b>الإجمالي: ${total}</b>${o.notes ? `<br>ملاحظات: ${esc(o.notes)}` : ""}<ul>${items}</ul><div class="field"><label>حالة الطلب</label><select onchange="updateStatus('${o.id}',this.value)">${STATUSES.map(s => `<option${s === o.status ? " selected" : ""}>${esc(s)}</option>`).join("")}</select></div></div>`;
     }).join("") : '<div class="empty">لا توجد طلبات بعد.</div>';
 }
 
@@ -1301,6 +1311,7 @@ async function loadSettings() {
     setWa.value = m.whatsapp || "";
     setWaMsg.value = m.wa_message || "";
     loadDesign(m);
+    loadSlides(m.hero_slides);
 }
 settingsForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -1405,9 +1416,9 @@ const jparse = v => {
 // ===== تخصيص واجهة المتجر =====
 // الألوان الافتراضية (نفس يلي بصفحة المتجر)
 const THEME_DEFAULT = { dark: {
-        bg: "#0e0b1d", text: "#c9c2e3", heading: "#f1effa", accent: "#8b7cc7", accent2: "#5a3b8c", menuBg: "#2a1e4d", menuText: "#c9c2e3", surface: "#2a1e4d", line: "#3a3a52", mist: "#221940", dark: "#5a3b8c", muted: "#8b7cc7"
+        bg: "#f4f6f7", text: "#252b30", heading: "#15191d", accent: "#526b83", accent2: "#78958e", menuBg: "#ffffff", menuText: "#15191d", surface: "#ffffff", line: "#dce2e5", mist: "#e9eef0", dark: "#15191d", muted: "#65707a"
     }, light: {
-        bg: "#eadcc8", text: "#0f3d3e", heading: "#0a0f14", accent: "#c6601f", accent2: "#7fb3b8", menuBg: "#f3e9d9", menuText: "#0a0f14", surface: "#f6eee1", line: "#d3c2a6", mist: "#e1d1b7", dark: "#0f3d3e", muted: "#2e6f73"
+        bg: "#faf6ec", text: "#4a3b2a", heading: "#5b4630", accent: "#a8812e", accent2: "#d9bf86", menuBg: "#fffdf8", menuText: "#5b4630", surface: "#fffdf8", line: "#e7dcc3", mist: "#f3ead6", dark: "#6b5238", muted: "#7d6d56"
     } };
 // أسماء حقول الألوان بالعربي
 const THEME_LABELS = {
@@ -1419,7 +1430,7 @@ const NAV_DEFAULT = [
 ];
 // الأهداف الممكنة لروابط القائمة
 const NAV_TARGETS = [
-    ["s:home", "الرئيسية (أعلى الصفحة)"], ["s:fabrics", "الأقمشة"], ["s:tailoring", "الخياطة والتفصيل (قسم)"], ["s:gallery", "أعمالنا"], ["s:how", "طريقة الطلب"], ["s:contact", "تواصل معنا"], ["p:sewing", "صفحة طرق الخياطة"], ["u:", "رابط خارجي (https)"]
+    ["s:home", "الرئيسية (أعلى الصفحة)"], ["s:fabrics", "الأقمشة"], ["s:tailoring", "الخياطة والتفصيل (قسم)"], ["s:gallery", "أعمالنا"], ["s:how", "طريقة الطلب"], ["s:contact", "تواصل معنا"], ["p:sewing", "صفحة طرق الخياطة"], ["p:composite", "صفحة البرداية المركّبة"], ["u:", "رابط خارجي (https)"]
 ];
 // النصوص القابلة للتعديل: [اسم المجموعة، [[المفتاح، الاسم، النص الافتراضي]]]
 const CONTENT_GROUPS = [
@@ -1440,7 +1451,7 @@ const CONTENT_GROUPS = [
 ];
 // أسماء أقسام الصفحة الرئيسية
 const SEC_LABELS = {
-    home: "الغلاف الرئيسي", benefits: "شريط المميزات", fabrics: "الأقمشة", tailoring: "طرق الخياطة", gallery: "أعمالنا", how: "طريقة الطلب", contact: "قسم التواصل مع الدعم"
+    slider: "الشاشة المتحركة (السلايدر)", home: "الغلاف الرئيسي", benefits: "شريط المميزات", fabrics: "الأقمشة", tailoring: "طرق الخياطة", gallery: "أعمالنا", how: "طريقة الطلب", contact: "قسم التواصل مع الدعم"
 };
 // التحقق من صيغة اللون
 const HEXOK = v => /^#[0-9a-fA-F]{6}$/.test(v || "");
@@ -1481,6 +1492,8 @@ function loadDesign(m) {
     };
     const so = c.sections || {};
     secOrder = Array.isArray(so.order) ? so.order.filter(k => SEC_LABELS[k]) : [];
+    if (!secOrder.includes("slider"))
+        secOrder.unshift("slider");
     Object.keys(SEC_LABELS).forEach(k => {
         if (!secOrder.includes(k))
             secOrder.push(k);
@@ -1971,7 +1984,7 @@ async function loadVisits() {
         visitStats.innerHTML = '<div class="empty">تعذّر تحميل الإحصائيات: ' + esc(error.message) + '</div>';
         return;
     }
-    const n = x => Number(x || 0).toLocaleString("ar-SY");
+    const n = x => Number(x || 0).toLocaleString("en-US");
     visitStats.innerHTML = [
         ["اليوم", data.today, data.u_today], ["آخر 7 أيام", data.week, data.u_week], ["آخر 30 يوماً", data.month, data.u_month], ["الإجمالي", data.total, data.u_total]
     ].map(([l, v, u]) => `<div class="card" style="margin:0"><b>${l}</b><div style="font-size:28px;font-weight:bold">${n(v)}</div><small>زيارة — ${n(u)} زائر مختلف</small></div>`).join("");
@@ -2414,5 +2427,98 @@ document.getElementById("compSideForm").addEventListener("submit", async (e) => 
     compSidePrice.value = 0;
     await compLoad();
 });
-  </script>
+  
+// ===== الشاشة المتحركة =====
+let slideDraft = [], slideSaved = [];
+
+// تحميل الشرائح المحفوظة
+function loadSlides(v) {
+    const o = jparse(v) || {};
+    slideSaved = (Array.isArray(o.slides) ? o.slides : []).filter(x => x && typeof x === "object").map(x => ({
+        img: String(x.img || ""), title: String(x.title || ""), text: String(x.text || ""), btn: String(x.btn || ""), t: String(x.t || "s:fabrics"), file: null
+    }));
+    slideDraft = slideSaved.map(x => ({ ...x }));
+    document.getElementById("slSecs").value = Number(o.secs) || 5;
+    renderSlides();
+}
+
+// رسم محرر الشرائح
+function renderSlides() {
+    document.getElementById("slideList").innerHTML = slideDraft.map((s, i) => {
+        const pv = s.file ? `<img class="pv" src="${URL.createObjectURL(s.file)}" alt="">` : imgTag(s.img);
+        return `<div class="card" style="margin-top:12px"><b>شريحة ${i + 1}</b><div class="grid" style="margin-top:10px">
+<div class="field"><label>الصورة (يفضّل عريضة)</label>${pv}<input type="file" accept="image/*" onchange="slideDraft[${i}].file=this.files[0]||null"><div class="actions"><button class="btn danger" onclick="slNoImg(${i})">إزالة الصورة</button></div></div>
+<div class="field"><label>العنوان</label><input maxlength="120" value="${esc(s.title)}" oninput="slideDraft[${i}].title=this.value"></div>
+<div class="field full"><label>النص</label><input maxlength="300" value="${esc(s.text)}" oninput="slideDraft[${i}].text=this.value"></div>
+<div class="field"><label>نص الزر (اتركه فاضي لإخفاء الزر)</label><input maxlength="40" value="${esc(s.btn)}" oninput="slideDraft[${i}].btn=this.value"></div>
+<div class="field"><label>وجهة الزر</label><select onchange="slTarget(${i},this.value)">${NAV_TARGETS.map(([v, l]) => `<option value="${v}"${navKind(s.t) === v ? " selected" : ""}>${l}</option>`).join("")}</select></div>
+${s.t.startsWith("u:") ? `<div class="field full"><label>الرابط (https فقط)</label><input value="${esc(s.t.slice(2))}" placeholder="https://..." oninput="slideDraft[${i}].t='u:'+this.value"></div>` : ""}
+</div><div class="actions"><button class="btn secondary" onclick="slMove(${i},-1)">▲</button><button class="btn secondary" onclick="slMove(${i},1)">▼</button><button class="btn danger" onclick="slDel(${i})">حذف الشريحة</button></div></div>`;
+    }).join("") || '<div class="empty">ما في شرائح. اضغط «إضافة شريحة».</div>';
+}
+function slAdd() {
+    if (slideDraft.length >= 8) {
+        alert("الحد الأقصى 8 شرائح");
+        return;
+    }
+    slideDraft.push({ img: "", title: "", text: "", btn: "", t: "s:fabrics", file: null });
+    renderSlides();
+}
+function slDel(i) {
+    if (!confirm("حذف هذه الشريحة؟ (ما بتنحذف نهائياً لحد ما تضغط حفظ ونشر)"))
+        return;
+    slideDraft.splice(i, 1);
+    renderSlides();
+}
+function slMove(i, d) {
+    const j = i + d;
+    if (j < 0 || j >= slideDraft.length)
+        return;
+    [slideDraft[i], slideDraft[j]] = [slideDraft[j], slideDraft[i]];
+    renderSlides();
+}
+function slNoImg(i) {
+    slideDraft[i].img = "";
+    slideDraft[i].file = null;
+    renderSlides();
+}
+function slTarget(i, v) {
+    slideDraft[i].t = v === "u:" ? "u:https://" : v;
+    renderSlides();
+}
+
+// حفظ ونشر: رفع الصور الجديدة وحفظ hero_slides بجدول store_settings
+async function slSave() {
+    const secs = Math.min(30, Math.max(2, Number(document.getElementById("slSecs").value) || 5)), ups = [], out = [];
+    try {
+        for (const s of slideDraft) {
+            if (s.t.startsWith("u:") && !/^u:https:\/\/[^\s"'<>]+$/.test(s.t))
+                throw new Error("رابط الزر لازم يبدأ بـ https://");
+            let img = s.img;
+            if (s.file) {
+                img = await uploadImage(s.file, "slides");
+                ups.push(img);
+            }
+            if (!img && !s.title.trim())
+                continue;
+            out.push({ img, title: s.title.trim().slice(0, 120), text: s.text.trim().slice(0, 300), btn: s.btn.trim().slice(0, 40), t: s.t });
+        }
+        const val = JSON.stringify({ secs, slides: out });
+        const { error } = await sb.from("store_settings").upsert([{ key: "hero_slides", value: val }]);
+        if (error)
+            throw error;
+        const keep = new Set(out.map(x => x.img));
+        for (const o of slideSaved)
+            if (o.img && !keep.has(o.img))
+                await removeImage(o.img);
+        loadSlides(val);
+        alert("تم حفظ ونشر الشاشة المتحركة. تظهر على المتجر فوراً.");
+    }
+    catch (err) {
+        for (const u of ups)
+            await removeImage(u);
+        alert("لم يتم الحفظ: " + (err.message || err));
+    }
+}
+</script>
 </body></html>

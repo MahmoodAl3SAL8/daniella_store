@@ -40,22 +40,22 @@
   <style>
     /* متغيرات الألوان الأساسية. الجافاسكربت بيغيّرها لما الثيم يتبدّل */
     :root {
-      --heading: #f1effa;
-      --menu-bg: #2a1e4d;
-      --menu-text: #c9c2e3;
-      --bg: #0e0b1d;
-      --surface: #2a1e4d;
-      --mist: #221940;
-      --slate: #8b7cc7;
-      --sage: #5a3b8c;
-      --ink-black: #5a3b8c;
-      --ink: #c9c2e3;
-      --muted: #8b7cc7;
-      --line: #3a3a52;
+      --heading: #15191d;
+      --menu-bg: #ffffff;
+      --menu-text: #15191d;
+      --bg: #f4f6f7;
+      --surface: #ffffff;
+      --mist: #e9eef0;
+      --slate: #526b83;
+      --sage: #78958e;
+      --ink-black: #15191d;
+      --ink: #252b30;
+      --muted: #65707a;
+      --line: #dce2e5;
       --white: #fff;
-      --on-accent: #202020;
-      --on-accent2: #ffffff;
-      --on-dark: #ffffff;
+      --on-accent: #ffffff;
+      --on-accent2: #202020;
+      --on-dark: #f5f5f5;
       --hdr: var(--menu-bg)
     }
 
@@ -1150,13 +1150,67 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--slate); outline
 .cs-item.on .ck { opacity: 1; }
 .cs-item.off { opacity: .45; cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) { .cs-menu, .cs-ov, .cs-arrow { transition: none; } }
+
+/* إلغاء المربع الأزرق عند الضغط */
+* { -webkit-tap-highlight-color: transparent; }
+a, button, .category, .cs-btn, .cs-item, .cp-card, .cp-color { outline: none; }
+/* إطار الفوكس يبقى فقط للتنقل بلوحة المفاتيح */
+button:focus-visible, a:focus-visible { outline: 2px solid var(--slate); outline-offset: 2px; }
+button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
+
+/* ===== الشاشة المتحركة (السلايدر) ===== */
+.slider{padding:0;position:relative;overflow:hidden;height:clamp(320px,62vh,560px);background:var(--ink-black)}
+.slider[hidden]{display:none}
+.has-slider [data-sec="home"]{display:none}
+.sl-slide{position:absolute;inset:0;display:flex;align-items:center;padding:0 8%;color:#fff;background:linear-gradient(135deg,var(--slate),var(--ink-black)) center/cover no-repeat;opacity:0;visibility:hidden;transition:opacity .9s ease,visibility 0s .9s}
+.sl-slide::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#111111d9,#11111133)}
+.sl-slide.on{opacity:1;visibility:visible;transition:opacity .9s ease}
+.sl-copy{position:relative;max-width:560px}
+.sl-copy h2{font-size:clamp(30px,5vw,56px);line-height:1.25;margin:0 0 10px}
+.sl-copy p{font-size:18px;margin:0 0 18px;color:#f5f5f5}
+.sl-copy .primary{display:inline-block;text-decoration:none;background:var(--sage);color:var(--on-accent2);padding:13px 28px}
+.sl-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:42px;height:42px;border-radius:50%;border:0;background:#ffffff33;color:#fff;font-size:26px;line-height:1;padding:0;backdrop-filter:blur(4px)}
+.sl-next{left:14px}.sl-prev{right:14px}
+.sl-dots{position:absolute;bottom:14px;left:0;right:0;z-index:3;display:flex;justify-content:center;gap:8px}
+.sl-dots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:#ffffff80;transition:width .25s}
+.sl-dots button.on{background:#fff;width:26px;border-radius:6px}
+@media(max-width:560px){.sl-nav{width:34px;height:34px;font-size:22px}.sl-copy p{font-size:15px}}
+@media (prefers-reduced-motion: reduce){.sl-slide,.sl-slide.on{transition:none}}
+
+/* ===== زر الثيم الدائري + انتقال الدائرة (متل تليجرام) ===== */
+.theme-btn{width:42px;height:42px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--slate);background:var(--menu-bg);color:var(--slate)}
+.theme-btn svg{width:20px;height:20px;animation:thSpin .55s cubic-bezier(.4,1.4,.5,1)}
+@keyframes thSpin{from{transform:rotate(-120deg) scale(.4);opacity:0}to{transform:none;opacity:1}}
+@media(max-width:560px){.theme-btn{width:38px;height:38px;padding:0}}
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-old(root){z-index:1}
+::view-transition-new(root){z-index:2}
+@media (prefers-reduced-motion: reduce){.theme-btn svg{animation:none}}
+
+/* ===== أنيميشن نجاح الطلب ===== */
+.ok-ov{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;background:rgba(10,12,20,.72);backdrop-filter:blur(6px);animation:okFade .3s ease both;cursor:pointer}
+.ok-ov.out{animation:okOut .35s ease forwards}
+@keyframes okFade{from{opacity:0}to{opacity:1}}
+@keyframes okOut{to{opacity:0}}
+.ok-box{text-align:center;color:#fff;font-family:inherit}
+.ok-disc{position:relative;width:190px;height:190px;margin:0 auto;border-radius:50%;background:#1a2133;display:flex;align-items:center;justify-content:center;animation:okPop .5s cubic-bezier(.2,1.4,.4,1) both}
+.ok-circ{width:104px;height:104px;border-radius:50%;background:#1fbf84;display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px #1fbf8466;animation:okPop .55s .15s cubic-bezier(.2,1.5,.4,1) both}
+.ok-circ svg{width:58px;height:58px}
+.ok-circ path{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:44;stroke-dashoffset:44;animation:okDraw .45s .5s ease-out forwards}
+@keyframes okPop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes okDraw{to{stroke-dashoffset:0}}
+.ok-cf{position:absolute;left:50%;top:50%;opacity:0;animation:okCf .95s .55s cubic-bezier(.15,.8,.3,1) both}
+@keyframes okCf{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) rotate(var(--r)) scale(1)}}
+.ok-t{margin-top:22px;font-size:22px;font-weight:bold;animation:okFade .4s .7s both}
+.ok-s{margin-top:6px;font-size:14px;opacity:.8;animation:okFade .4s .85s both}
+@media (prefers-reduced-motion: reduce){.ok-disc,.ok-circ,.ok-circ path,.ok-cf,.ok-t,.ok-s{animation:none}.ok-circ path{stroke-dashoffset:0}.ok-cf{display:none}}
 </style>
   <script>
 // ألوان الثيمين الافتراضية (dark و light). كل مفتاح لون بيتحول لمتغير CSS
 const THEME_DEFAULT = { dark: {
-        bg: "#0e0b1d", text: "#c9c2e3", heading: "#f1effa", accent: "#8b7cc7", accent2: "#5a3b8c", menuBg: "#2a1e4d", menuText: "#c9c2e3", surface: "#2a1e4d", line: "#3a3a52", mist: "#221940", dark: "#5a3b8c", muted: "#8b7cc7"
+        bg: "#f4f6f7", text: "#252b30", heading: "#15191d", accent: "#526b83", accent2: "#78958e", menuBg: "#ffffff", menuText: "#15191d", surface: "#ffffff", line: "#dce2e5", mist: "#e9eef0", dark: "#15191d", muted: "#65707a"
     }, light: {
-        bg: "#eadcc8", text: "#0f3d3e", heading: "#0a0f14", accent: "#c6601f", accent2: "#7fb3b8", menuBg: "#f3e9d9", menuText: "#0a0f14", surface: "#f6eee1", line: "#d3c2a6", mist: "#e1d1b7", dark: "#0f3d3e", muted: "#2e6f73"
+        bg: "#faf6ec", text: "#4a3b2a", heading: "#5b4630", accent: "#a8812e", accent2: "#d9bf86", menuBg: "#fffdf8", menuText: "#5b4630", surface: "#fffdf8", line: "#e7dcc3", mist: "#f3ead6", dark: "#6b5238", muted: "#7d6d56"
     } };
 // ربط كل مفتاح لون بمتغير CSS يلي بيغيّره
 const THEME_VARS = {
@@ -1256,20 +1310,57 @@ function themeFromSettings(S) {
 // زر التبديل بين الوضع الفاتح والداكن
 function toggleTheme() {
     const n = THEME_NAME === "light" ? "dark" : "light";
-    if (!PREVIEW) {
-        try {
-            localStorage.setItem("dn_theme", n);
+    const apply = () => {
+        if (!PREVIEW) {
+            try {
+                localStorage.setItem("dn_theme", n);
+            }
+            catch (e) { }
         }
-        catch (e) { }
+        applyTheme(n);
+    };
+    const b = document.getElementById("themeBtn");
+    const reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!b || reduced) {
+        apply();
+        return;
     }
-    applyTheme(n);
+    // دائرة بتتوسّع من مكان الزر (متل تليجرام)
+    const r = b.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const R = Math.ceil(Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)));
+    const clip = [`circle(0px at ${x}px ${y}px)`, `circle(${R}px at ${x}px ${y}px)`];
+    if (document.startViewTransition) {
+        const vt = document.startViewTransition(apply);
+        vt.ready.then(() => document.documentElement.animate({ clipPath: clip }, { duration: 600, easing: "ease-in-out", pseudoElement: "::view-transition-new(root)" })).catch(() => { });
+        return;
+    }
+    // بديل للمتصفحات يلي ما بتدعم View Transitions
+    const t = Object.assign({}, THEME_DEFAULT[n]), c = THEME_CUSTOM && THEME_CUSTOM[n];
+    if (c && typeof c === "object")
+        for (const k in t)
+            if (HEX.test(c[k] || ""))
+                t[k] = c[k];
+    const ov = document.createElement("div");
+    ov.style.cssText = "position:fixed;inset:0;z-index:9999;pointer-events:none;background:" + t.bg;
+    document.body.appendChild(ov);
+    const a = ov.animate({ clipPath: clip }, { duration: 450, easing: "ease-in-out" });
+    a.onfinish = () => {
+        apply();
+        ov.animate({ opacity: [1, 0] }, { duration: 250 }).onfinish = () => ov.remove();
+    };
 }
 
 // تغيير نص زر الثيم حسب الوضع الحالي
 function paintThemeBtn() {
     const b = document.getElementById("themeBtn");
-    if (b)
-        b.textContent = THEME_NAME === "light" ? "🌙 داكن" : "☀️ فاتح";
+    if (!b)
+        return;
+    const toLight = THEME_NAME !== "light";
+    b.innerHTML = toLight
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2.5v2.3M12 19.2v2.3M2.5 12h2.3M19.2 12h2.3M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+    b.setAttribute("aria-label", toLight ? "الوضع الفاتح" : "الوضع الداكن");
+    b.title = toLight ? "الوضع الفاتح" : "الوضع الداكن";
 }
 
 // بعد ما تنحمل الصفحة بنحدّث نص الزر
@@ -1328,7 +1419,7 @@ function renderNav(v) {
 const HTTPS_URL = /^https:\/\/[^\s"'()<>\\]+$/;
 const imgOk = u => HTTPS_URL.test(u || "") || (PREVIEW && /^blob:[^\s"'()<>\\]+$/.test(u || ""));
 // أقسام الصفحة الرئيسية بترتيبها الأصلي
-const SECTIONS = ["home", "benefits", "fabrics", "tailoring", "gallery", "how", "contact"];
+const SECTIONS = ["slider", "home", "benefits", "fabrics", "tailoring", "gallery", "how", "contact"];
 
 // JSON.parse بدون أخطاء: بيرجع null إذا النص غلط
 function jparse(v) {
@@ -1474,7 +1565,7 @@ initTheme();
   </script>
   <!-- تطبيق ويب (PWA): الأيقونة والمانيفست وتسجيل الـ service worker -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0e0b1d">
+  <meta name="theme-color" content="#ffffff">
   <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1484,7 +1575,6 @@ initTheme();
     if ("serviceWorker" in navigator && location.protocol === "https:")
       window.addEventListener("load", function () { navigator.serviceWorker.register("daniella_sw.js").catch(function () {}); });
   </script>
-<link rel="stylesheet" href="daniella_fx.css?v=1">
 </head>
 
 <body>
@@ -1503,6 +1593,13 @@ initTheme();
   </header>
   <!-- محتوى الصفحة: كل قسم له data-sec عشان ينرتّب أو ينخفي من لوحة التحكم -->
   <main>
+    <!-- الشاشة المتحركة: بتتعبّى من لوحة التحكم، وإذا فاضية بتنخفي ويظهر الغلاف العادي -->
+    <section class="slider" id="slider" data-sec="slider" hidden aria-roledescription="carousel">
+      <div id="slTrack"></div>
+      <button class="sl-nav sl-prev" type="button" aria-label="السابق" onclick="slGo(-1)">›</button>
+      <button class="sl-nav sl-next" type="button" aria-label="التالي" onclick="slGo(1)">‹</button>
+      <div class="sl-dots" id="slDots"></div>
+    </section>
     <!-- الغلاف -->
     <section class="hero" id="home" data-sec="home">
       <div class="hero-copy">
@@ -1559,13 +1656,13 @@ initTheme();
         <p data-c="howSub">من اختيار القماش حتى تأكيد الطلب</p>
       </div>
       <div class="steps">
-        <div class="step"><strong>١</strong><b>اختاري القماش</b>
+        <div class="step"><strong>1</strong><b>اختاري القماش</b>
           <p>تصفحي الأنواع والألوان.</p>
         </div>
-        <div class="step"><strong>٢</strong><b>أدخلي القياسات</b>
+        <div class="step"><strong>2</strong><b>أدخلي القياسات</b>
           <p>حددي الأمتار، وإن أردتِ خياطة اختاري الطريقة والقياسات والبطانة.</p>
         </div>
-        <div class="step"><strong>٣</strong><b>أرسلي الطلب</b>
+        <div class="step"><strong>3</strong><b>أرسلي الطلب</b>
           <p>أضيفي عنوان التوصيل وطريقة الدفع.</p>
         </div>
       </div>
@@ -1682,7 +1779,7 @@ async function loadProducts() {
 // activeCat: التصنيف المختار، cart: السلة، sel: اللون المختار لكل قماش
 let activeCat = "الكل", cart = [], sel = {};
 // تنسيق السعر بالليرة السورية
-const money = n => new Intl.NumberFormat('ar-SY').format(n) + " ل.س";
+const money = n => new Intl.NumberFormat('en-US').format(n) + " ل.س";
 
 // رسم بطاقات الأقمشة بعد الفلترة بالتصنيف والبحث والترتيب حسب السعر
 function renderProducts() {
@@ -1789,6 +1886,7 @@ async function loadOptions() {
     SET = {};
     (st.data || []).forEach(r => SET[r.key] = r.value);
     liveApply(SET);
+    if (typeof applySlides === "function") applySlides(SET.hero_slides);
     CATIMG = {};
     (ci.data || []).forEach(r => CATIMG[r.category] = r.image_url);
     renderCategories();
@@ -2012,7 +2110,7 @@ function openCheckout() {
 // تحديث الإجمالي وملاحظة شام كاش حسب العملة وطريقة الدفع
 function coUpdate() {
     const cur = document.getElementById('coCur').value || "SYP", pay = document.getElementById('coPay').value;
-    document.getElementById('coTotal').innerHTML = '<b>الإجمالي التقريبي: ' + fmt(cartTotal(), cur) + '</b>' + (cur === "USD" ? '<br><small>سعر الصرف: ' + new Intl.NumberFormat('ar-SY').format(rate()) + ' ل.س للدولار</small>' : '');
+    document.getElementById('coTotal').innerHTML = '<b>الإجمالي التقريبي: ' + fmt(cartTotal(), cur) + '</b>' + (cur === "USD" ? '<br><small>سعر الصرف: ' + new Intl.NumberFormat('en-US').format(rate()) + ' ل.س للدولار</small>' : '');
     const n = document.getElementById('shamNote');
     if (pay === "شام كاش") {
         n.style.display = '';
@@ -2063,6 +2161,8 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
     }
     const o = data || {}, tot = o.currency === "USD" ? "$" + Number(o.total_usd).toFixed(2) : money(o.total_syp);
     out.innerHTML = '<div class="notice"><b>تم استلام طلبك ✅</b><br>رقم الطلب: ' + esc(String(o.order_id).slice(0, 8)) + '<br>الإجمالي: ' + esc(tot) + (SET.store_phone ? '<br>للاستفسار: ' + esc(SET.store_phone) : '') + (f.payment === "شام كاش" ? '<br>' + esc(SET.shamcash_info || "سنتواصل معك لتزويدك ببيانات التحويل.") : "") + '</div>';
+    if (typeof showSuccess === "function")
+        showSuccess(String(o.order_id).slice(0, 8));
     // رسالة واتساب لفريق المحل بتفاصيل الطلب ورقمه
     const waNum = String(SET.whatsapp || "").replace(/\D/g, "");
     if (waNum.length >= 8 && waNum.length <= 15) {
@@ -2121,6 +2221,79 @@ loadOptions();
 logVisit("store");
   </script>
 
+<script>
+/* أنيميشن نجاح الطلب: دائرة خضراء + صح + قصاصات ملونة */
+window.showSuccess = function (num) {
+  var old = document.querySelector('.ok-ov'); if (old) old.remove();
+  var ov = document.createElement('div'); ov.className = 'ok-ov'; ov.setAttribute('role', 'status');
+  var cols = ['#4aa8e0', '#e0a93a', '#e87d3e', '#e0709a', '#3b6fe0', '#c9d94a'], cf = '';
+  for (var i = 0; i < 14; i++) {
+    var ang = (Math.PI * 2 * i / 14) + (Math.random() - .5) * .4, d = 85 + Math.random() * 40, pill = i % 3 === 0;
+    cf += '<span class="ok-cf" style="--dx:' + Math.round(Math.cos(ang) * d) + 'px;--dy:' + Math.round(Math.sin(ang) * d) + 'px;--r:' + Math.round(Math.random() * 360) + 'deg;background:' + cols[i % cols.length] + ';width:' + (pill ? 14 : 9) + 'px;height:' + (pill ? 5 : 9) + 'px;border-radius:' + (pill ? 3 : 50) + '%;animation-delay:' + (.55 + Math.random() * .12).toFixed(2) + 's"></span>';
+  }
+  ov.innerHTML = '<div class="ok-box"><div class="ok-disc">' + cf + '<div class="ok-circ"><svg viewBox="0 0 48 48"><path d="M12 25l9 9 16-19"/></svg></div></div><div class="ok-t">تم استلام طلبك</div><div class="ok-s">' + (num ? 'رقم الطلب: #' + esc(String(num)) : '') + '</div></div>';
+  var done = function () { ov.classList.add('out'); setTimeout(function () { ov.remove(); }, 360); };
+  ov.addEventListener('click', done);
+  document.body.appendChild(ov);
+  setTimeout(done, 3200);
+};
+</script>
+<script>
+/* السلايدر: الشرائح من إعداد hero_slides بجدول store_settings */
+(function () {
+  var st = { i: 0, t: null, n: 0, secs: 5 };
+  function show(k) {
+    var sl = document.querySelectorAll('#slTrack .sl-slide'), ds = document.querySelectorAll('#slDots button');
+    if (!sl.length) return;
+    st.i = (k + sl.length) % sl.length;
+    sl.forEach(function (e, j) { e.classList.toggle('on', j === st.i); e.setAttribute('aria-hidden', j === st.i ? 'false' : 'true'); });
+    ds.forEach(function (e, j) { e.classList.toggle('on', j === st.i); });
+  }
+  function play() {
+    clearInterval(st.t);
+    if (st.n > 1 && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches))
+      st.t = setInterval(function () { show(st.i + 1); }, st.secs * 1000);
+  }
+  window.slGo = function (d) { show(st.i + d); play(); };
+  window.slTo = function (k) { show(k); play(); };
+  window.applySlides = function (v) {
+    var o = jparse(v) || {}, sec = document.querySelector('[data-sec="slider"]'), hero = document.querySelector('[data-sec="home"]');
+    if (!sec || !hero) return;
+    var a = (Array.isArray(o.slides) ? o.slides : []).filter(function (x) { return x && typeof x === 'object'; }).slice(0, 8);
+    st.secs = Math.min(30, Math.max(2, Number(o.secs) || 5));
+    st.n = a.length;
+    var root = document.documentElement;
+    if (!a.length) {
+      clearInterval(st.t);
+      sec.hidden = true; root.classList.remove('has-slider');
+      if (sec.id === 'home') { sec.id = 'slider'; hero.id = 'home'; }
+      return;
+    }
+    hero.id = 'home-hero'; sec.id = 'home';
+    sec.hidden = false; root.classList.add('has-slider');
+    var tr = document.getElementById('slTrack');
+    tr.innerHTML = a.map(function (s) {
+      var title = String(s.title || '').slice(0, 120), text = String(s.text || '').slice(0, 300), btn = String(s.btn || '').slice(0, 40);
+      return '<div class="sl-slide"><div class="sl-copy">' + (title ? '<h2>' + esc(title) + '</h2>' : '') + (text ? '<p>' + esc(text) + '</p>' : '') + (btn && s.t ? '<a class="primary" href="' + esc(navHref(String(s.t))) + '">' + esc(btn) + '</a>' : '') + '</div></div>';
+    }).join('');
+    tr.querySelectorAll('.sl-slide').forEach(function (e, j) { if (imgOk(a[j].img)) e.style.backgroundImage = 'url("' + a[j].img + '")'; });
+    document.getElementById('slDots').innerHTML = a.length > 1 ? a.map(function (_, j) { return '<button type="button" aria-label="شريحة ' + (j + 1) + '" onclick="slTo(' + j + ')"></button>'; }).join('') : '';
+    sec.querySelectorAll('.sl-nav').forEach(function (b) { b.style.display = a.length > 1 ? '' : 'none'; });
+    show(0); play();
+  };
+  var sx = null, box = document.getElementById('slider');
+  if (box) {
+    box.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
+    box.addEventListener('touchend', function (e) {
+      if (sx == null) return;
+      var d = e.changedTouches[0].clientX - sx; sx = null;
+      if (Math.abs(d) > 40) window.slGo(d < 0 ? 1 : -1);
+    }, { passive: true });
+    box.addEventListener('mouseenter', function () { clearInterval(st.t); });
+    box.addEventListener('mouseleave', play);
+  }
+})();
+</script>
 <script>
 /* قوائم منسدلة أنيقة: بتستبدل قائمة المتصفح الأصلية وبتبقي الـ select الأصلي شغال (القيم والأحداث) */
 (function () {
@@ -2267,10 +2440,6 @@ logVisit("store");
   }).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
-<script src="daniella_fx.js?v=1"></script>
 </body>
 
 </html>

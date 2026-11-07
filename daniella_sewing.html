@@ -15,22 +15,22 @@
 <style>
   /* متغيرات الألوان الأساسية. الجافاسكربت بيغيّرها لما الثيم يتبدّل */
   :root {
-    --heading: #f1effa;
-    --menu-bg: #2a1e4d;
-    --menu-text: #c9c2e3;
-    --bg: #0e0b1d;
-    --surface: #2a1e4d;
-    --mist: #221940;
-    --slate: #8b7cc7;
-    --sage: #5a3b8c;
-    --ink-black: #5a3b8c;
-    --ink: #c9c2e3;
-    --muted: #8b7cc7;
-    --line: #3a3a52;
+    --heading: #15191d;
+    --menu-bg: #ffffff;
+    --menu-text: #15191d;
+    --bg: #f4f6f7;
+    --surface: #ffffff;
+    --mist: #e9eef0;
+    --slate: #526b83;
+    --sage: #78958e;
+    --ink-black: #15191d;
+    --ink: #252b30;
+    --muted: #65707a;
+    --line: #dce2e5;
     --white: #fff;
-    --on-accent: #202020;
-    --on-accent2: #ffffff;
-    --on-dark: #ffffff;
+    --on-accent: #ffffff;
+    --on-accent2: #202020;
+    --on-dark: #f5f5f5;
     --hdr: var(--menu-bg);
   }
 
@@ -1051,13 +1051,30 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--slate); outline
   .primary, .secondary, .cart-btn, .theme-btn, .menu-btn, .cbtn, .product, .category, .sw-card, .gallery figure, .step { transition: none; }
   .product:hover, .sw-card:hover, .gallery figure:hover, .step:hover, .primary:hover, .secondary:hover, .cart-btn:hover, .theme-btn:hover, .menu-btn:hover, .cbtn:hover { transform: none; }
 }
+
+/* إلغاء المربع الأزرق عند الضغط */
+* { -webkit-tap-highlight-color: transparent; }
+a, button, .category, .cs-btn, .cs-item, .cp-card, .cp-color { outline: none; }
+/* إطار الفوكس يبقى فقط للتنقل بلوحة المفاتيح */
+button:focus-visible, a:focus-visible { outline: 2px solid var(--slate); outline-offset: 2px; }
+button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
+
+/* ===== زر الثيم الدائري + انتقال الدائرة (متل تليجرام) ===== */
+.theme-btn{width:42px;height:42px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--slate);background:var(--menu-bg);color:var(--slate)}
+.theme-btn svg{width:20px;height:20px;animation:thSpin .55s cubic-bezier(.4,1.4,.5,1)}
+@keyframes thSpin{from{transform:rotate(-120deg) scale(.4);opacity:0}to{transform:none;opacity:1}}
+@media(max-width:560px){.theme-btn{width:38px;height:38px;padding:0}}
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-old(root){z-index:1}
+::view-transition-new(root){z-index:2}
+@media (prefers-reduced-motion: reduce){.theme-btn svg{animation:none}}
 </style>
 <script>
 // ألوان الثيمين الافتراضية (dark و light). كل مفتاح لون بيتحول لمتغير CSS
 const THEME_DEFAULT = { dark: {
-        bg: "#0e0b1d", text: "#c9c2e3", heading: "#f1effa", accent: "#8b7cc7", accent2: "#5a3b8c", menuBg: "#2a1e4d", menuText: "#c9c2e3", surface: "#2a1e4d", line: "#3a3a52", mist: "#221940", dark: "#5a3b8c", muted: "#8b7cc7"
+        bg: "#f4f6f7", text: "#252b30", heading: "#15191d", accent: "#526b83", accent2: "#78958e", menuBg: "#ffffff", menuText: "#15191d", surface: "#ffffff", line: "#dce2e5", mist: "#e9eef0", dark: "#15191d", muted: "#65707a"
     }, light: {
-        bg: "#eadcc8", text: "#0f3d3e", heading: "#0a0f14", accent: "#c6601f", accent2: "#7fb3b8", menuBg: "#f3e9d9", menuText: "#0a0f14", surface: "#f6eee1", line: "#d3c2a6", mist: "#e1d1b7", dark: "#0f3d3e", muted: "#2e6f73"
+        bg: "#faf6ec", text: "#4a3b2a", heading: "#5b4630", accent: "#a8812e", accent2: "#d9bf86", menuBg: "#fffdf8", menuText: "#5b4630", surface: "#fffdf8", line: "#e7dcc3", mist: "#f3ead6", dark: "#6b5238", muted: "#7d6d56"
     } };
 // ربط كل مفتاح لون بمتغير CSS يلي بيغيّره
 const THEME_VARS = {
@@ -1157,20 +1174,57 @@ function themeFromSettings(S) {
 // زر التبديل بين الوضع الفاتح والداكن
 function toggleTheme() {
     const n = THEME_NAME === "light" ? "dark" : "light";
-    if (!PREVIEW) {
-        try {
-            localStorage.setItem("dn_theme", n);
+    const apply = () => {
+        if (!PREVIEW) {
+            try {
+                localStorage.setItem("dn_theme", n);
+            }
+            catch (e) { }
         }
-        catch (e) { }
+        applyTheme(n);
+    };
+    const b = document.getElementById("themeBtn");
+    const reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!b || reduced) {
+        apply();
+        return;
     }
-    applyTheme(n);
+    // دائرة بتتوسّع من مكان الزر (متل تليجرام)
+    const r = b.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const R = Math.ceil(Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)));
+    const clip = [`circle(0px at ${x}px ${y}px)`, `circle(${R}px at ${x}px ${y}px)`];
+    if (document.startViewTransition) {
+        const vt = document.startViewTransition(apply);
+        vt.ready.then(() => document.documentElement.animate({ clipPath: clip }, { duration: 600, easing: "ease-in-out", pseudoElement: "::view-transition-new(root)" })).catch(() => { });
+        return;
+    }
+    // بديل للمتصفحات يلي ما بتدعم View Transitions
+    const t = Object.assign({}, THEME_DEFAULT[n]), c = THEME_CUSTOM && THEME_CUSTOM[n];
+    if (c && typeof c === "object")
+        for (const k in t)
+            if (HEX.test(c[k] || ""))
+                t[k] = c[k];
+    const ov = document.createElement("div");
+    ov.style.cssText = "position:fixed;inset:0;z-index:9999;pointer-events:none;background:" + t.bg;
+    document.body.appendChild(ov);
+    const a = ov.animate({ clipPath: clip }, { duration: 450, easing: "ease-in-out" });
+    a.onfinish = () => {
+        apply();
+        ov.animate({ opacity: [1, 0] }, { duration: 250 }).onfinish = () => ov.remove();
+    };
 }
 
 // تغيير نص زر الثيم حسب الوضع الحالي
 function paintThemeBtn() {
     const b = document.getElementById("themeBtn");
-    if (b)
-        b.textContent = THEME_NAME === "light" ? "🌙 داكن" : "☀️ فاتح";
+    if (!b)
+        return;
+    const toLight = THEME_NAME !== "light";
+    b.innerHTML = toLight
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2.5v2.3M12 19.2v2.3M2.5 12h2.3M19.2 12h2.3M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+    b.setAttribute("aria-label", toLight ? "الوضع الفاتح" : "الوضع الداكن");
+    b.title = toLight ? "الوضع الفاتح" : "الوضع الداكن";
 }
 
 // بعد ما تنحمل الصفحة بنحدّث نص الزر
@@ -1375,7 +1429,7 @@ initTheme();
   </script>
   <!-- تطبيق ويب (PWA): الأيقونة والمانيفست وتسجيل الـ service worker -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0e0b1d">
+  <meta name="theme-color" content="#ffffff">
   <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1385,7 +1439,6 @@ initTheme();
     if ("serviceWorker" in navigator && location.protocol === "https:")
       window.addEventListener("load", function () { navigator.serviceWorker.register("daniella_sw.js").catch(function () {}); });
   </script>
-<link rel="stylesheet" href="daniella_fx.css?v=1">
 </head>
 <body>
   <!-- الشريط العلوي -->
@@ -1433,7 +1486,7 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({
 // بنقبل بس روابط https
 const safeUrl = u => /^https:\/\//.test(u || "") ? u : "";
 // تنسيق السعر بالليرة السورية
-const money = n => new Intl.NumberFormat('ar-SY').format(n) + " ل.س";
+const money = n => new Intl.NumberFormat('en-US').format(n) + " ل.س";
 // ===== سكربت صفحة طرق الخياطة =====
 // رسم القائمة الافتراضية فوراً قبل ما توصل الإعدادات من القاعدة
 renderNav();
@@ -1471,8 +1524,4 @@ load();
 logVisit("sewing");
   </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
-<script src="daniella_fx.js?v=1"></script>
 </body></html>
